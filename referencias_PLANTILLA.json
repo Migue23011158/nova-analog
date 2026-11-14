@@ -1,0 +1,17 @@
+{
+  "_instrucciones": "Sexto físico: llenar mu (media) y sigma (dispersión) de cada variable en un radio de 20 km del sitio. Luna: LOLA (pendiente, rugosidad), Diviner (amplitud, inercia térmica). Marte: MOLA (pendiente, rugosidad), THEMIS (amplitud, inercia). Guardar como referencias.json en la misma carpeta de 02_similitud.py. La aridez planetaria es 0; sigma dice qué tan seco exigimos en la Tierra. Para amplitud_K y ati usar el valor TERRESTRE equivalente que ustedes decidan, no el lunar real (300 K no tiene análogo en la Tierra).",
+  "polo_sur_lunar": {
+    "pendiente_deg": {"mu": null, "sigma": null},
+    "rugosidad_m":   {"mu": null, "sigma": null},
+    "amplitud_K":    {"mu": null, "sigma": null},
+    "ati":           {"mu": null, "sigma": null},
+    "aridez_P_PET":  {"mu": 0.0,  "sigma": 0.08}
+  },
+  "jezero": {
+    "pendiente_deg": {"mu": null, "sigma": null},
+    "rugosidad_m":   {"mu": null, "sigma": null},
+    "amplitud_K":    {"mu": null, "sigma": null},
+    "ati":           {"mu": null, "sigma": null},
+    "aridez_P_PET":  {"mu": 0.0,  "sigma": 0.10}
+  }
+}
