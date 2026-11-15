@@ -1779,7 +1779,7 @@
 .parecidos-tags .tag.mars { color: #E8743B; }
 .parecidos-tags .tag.moon { color: #8DAED0; }
 .score-wrap > small.score-note {
-  display: block; margin: 5px auto 0; padding: 3px 8px; width: max-content; max-width: 200px; white-space: normal;
+  display: block; margin: 5px auto 0; padding: 3px 8px; width: max-content; max-width: 250px; white-space: normal;
   border-radius: 8px; background: rgba(6, 9, 15, 0.85); color: #b7c6d6; font: 9px 'Space Grotesk', sans-serif; line-height: 1.3;
 }
 .missing-track { cursor: help; }
@@ -1817,3 +1817,21 @@
 }
 .punto-card .punto-escala { }
 @media (max-width: 800px) { .punto-card .punto-escala { display: none; } }
+
+/* v7: botón de idioma */
+.lang-btn {
+  display: inline-flex; align-items: center; gap: 4px; height: 38px; padding: 0 12px; margin-right: 8px;
+  border-radius: 10px; border: 1px solid rgba(141, 174, 208, 0.25); background: rgba(8, 12, 20, 0.6);
+  color: #6b7a8c; font: 12px 'Space Grotesk', sans-serif; cursor: pointer;
+}
+.lang-btn b { font-weight: 500; }
+.lang-btn b.on { color: #eef4ff; font-weight: 700; }
+.lang-btn i { font-style: normal; opacity: 0.5; }
+@media (max-width: 800px) { .lang-btn { height: 34px; padding: 0 9px; margin-right: 4px; font-size: 11px; } }
+/* v7.1: notas del índice fuera del anillo (no tapan los nombres) */
+.score-notes { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; }
+.score-notes .score-note {
+  padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(141, 174, 208, 0.2);
+  background: rgba(6, 9, 15, 0.7); color: #b7c6d6; font: 11px 'Space Grotesk', sans-serif;
+}
+@media (max-width: 800px) { .score-notes .score-note { font-size: 10px; } }
