@@ -1755,3 +1755,65 @@
 .model-table td.ok { color: #5DBB86; font-weight: 600; }
 .model-table td.dif { color: #eab308; font-weight: 600; }
 @media (max-width: 800px) { .model-section { grid-template-columns: 1fr; } .model-table { overflow-x: auto; } }
+
+/* ===================== v6 (15-nov): selector de cuerpo, lista de parecidos, punto a gusto, etiquetas ===================== */
+.body-switch {
+  position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); top: 128px;
+  display: flex; gap: 2px; padding: 3px; border-radius: 999px;
+  background: rgba(8, 12, 20, 0.85); border: 1px solid rgba(141, 174, 208, 0.18);
+}
+.body-switch button {
+  display: flex; align-items: center; gap: 6px; padding: 7px 14px; border: 0; border-radius: 999px;
+  background: transparent; color: #9fb3c8; font: 12px 'Space Grotesk', sans-serif; cursor: pointer;
+}
+.body-switch button span { width: 7px; height: 7px; border-radius: 50%; background: #3BA3FF; }
+.body-switch button.b-marte span { background: #C1440E; }
+.body-switch button.b-luna span { background: #8DAED0; }
+.body-switch button.active { background: rgba(141, 174, 208, 0.16); color: #eef4ff; }
+.marker-meta { margin: 6px 0 0; color: #9fb3c8; font-size: 11px; line-height: 1.35; }
+.ref-card strong { display: block; margin-top: 4px; }
+.parecidos-nota { margin: 0 0 10px; color: #9fb3c8; font-size: 12px; line-height: 1.4; }
+.parecidos .card-heading h2 { font-size: 18px; }
+.parecidos-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.parecidos-tags .tag { font-size: 10px; padding: 2px 7px; border-radius: 999px; border: 1px solid currentColor; }
+.parecidos-tags .tag.mars { color: #E8743B; }
+.parecidos-tags .tag.moon { color: #8DAED0; }
+.score-wrap > small.score-note {
+  display: block; margin: 5px auto 0; padding: 3px 8px; width: max-content; max-width: 200px; white-space: normal;
+  border-radius: 8px; background: rgba(6, 9, 15, 0.85); color: #b7c6d6; font: 9px 'Space Grotesk', sans-serif; line-height: 1.3;
+}
+.missing-track { cursor: help; }
+.na-tag {
+  display: inline-block; margin-top: 4px; padding: 1px 7px; border-radius: 999px; cursor: help;
+  border: 1px solid rgba(141, 174, 208, 0.3); color: #9fb3c8; font-size: 10px; font-style: normal;
+}
+.site-image .leaflet-container { cursor: crosshair; }
+.punto-card {
+  position: absolute; z-index: 1000; left: 10px; right: 10px; bottom: 10px; max-width: 340px;
+  padding: 10px 12px; border-radius: 10px; background: rgba(8, 12, 20, 0.92);
+  border: 1px solid rgba(141, 174, 208, 0.25); color: #eef4ff; font-size: 12px;
+}
+.punto-card small { display: block; color: #9fb3c8; font-size: 10px; letter-spacing: 0.06em; }
+.punto-card strong { display: block; margin: 4px 0; font-size: 15px; }
+.punto-card p { margin: 2px 0 0; color: #c9d6e4; line-height: 1.35; }
+.punto-card .punto-escala { color: #8290a3; font-size: 10px; }
+.punto-close {
+  position: absolute; top: 4px; right: 8px; border: 0; background: none; color: #9fb3c8; font-size: 18px; cursor: pointer;
+}
+
+@media (max-width: 800px) {
+  .globe-hint { display: none; }
+  .body-switch { top: 124px; }
+  .body-switch button { padding: 6px 12px; font-size: 11px; }
+  .globe-area .marker-card { top: auto; bottom: 44px; left: auto; right: 4px; width: 172px; padding: 10px 12px; }
+  .marker-meta { font-size: 10px; }
+  /* textos que quedaban ilegibles (6–8 px) */
+  .explore-heading p { font-size: 9px; }
+  .image-meta, .site-chip, .ref-label, .confidence em, .metric-head span { font-size: 9px; }
+  .site-caption p { font-size: 10px; }
+  .target-switch button { font-size: 10px; }
+  .punto-card { font-size: 11px; padding: 8px 10px; }
+  .punto-card strong { font-size: 13px; }
+}
+.punto-card .punto-escala { }
+@media (max-width: 800px) { .punto-card .punto-escala { display: none; } }

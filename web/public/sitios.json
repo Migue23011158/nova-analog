@@ -84,7 +84,8 @@
     "arcadia|construccion": 1.0,
     "shackleton_borde|construccion": 1.0
    },
-   "viaje_min": 182.0
+   "viaje_min": 182.0,
+   "modelo": null
   },
   {
    "nombre": "Campo volcánico de Bayuda",
@@ -145,7 +146,14 @@
     "arcadia|construccion": 1.0,
     "shackleton_borde|construccion": 1.0
    },
-   "viaje_min": 859.0
+   "viaje_min": 859.0,
+   "modelo": {
+    "p_tierra": 0.809,
+    "p_marte": 0.031,
+    "p_luna": 0.16,
+    "clase": "no coincide",
+    "en_rango": false
+   }
   },
   {
    "nombre": "Harrat Khaybar",
@@ -206,7 +214,14 @@
     "arcadia|construccion": 1.0,
     "shackleton_borde|construccion": 1.0
    },
-   "viaje_min": 450.0
+   "viaje_min": 450.0,
+   "modelo": {
+    "p_tierra": 0.693,
+    "p_marte": 0.193,
+    "p_luna": 0.114,
+    "clase": "no coincide",
+    "en_rango": false
+   }
   },
   {
    "nombre": "Tubos de lava de Undara",
@@ -267,7 +282,8 @@
     "arcadia|construccion": 1.0,
     "shackleton_borde|construccion": 1.0
    },
-   "viaje_min": 215.0
+   "viaje_min": 215.0,
+   "modelo": null
   },
   {
    "nombre": "Atacama, Yungay",
@@ -328,7 +344,14 @@
     "arcadia|construccion": 1.0,
     "shackleton_borde|construccion": 1.0
    },
-   "viaje_min": 211.0
+   "viaje_min": 211.0,
+   "modelo": {
+    "p_tierra": 0.582,
+    "p_marte": 0.255,
+    "p_luna": 0.162,
+    "clase": "no coincide",
+    "en_rango": false
+   }
   },
   {
    "nombre": "Cráter Haughton, isla Devon",
@@ -389,7 +412,14 @@
     "arcadia|construccion": 0.83,
     "shackleton_borde|construccion": 0.83
    },
-   "viaje_min": 8097.0
+   "viaje_min": 8097.0,
+   "modelo": {
+    "p_tierra": 0.46,
+    "p_marte": 0.519,
+    "p_luna": 0.02,
+    "clase": "no coincide",
+    "en_rango": false
+   }
   },
   {
    "nombre": "Svalbard, Bockfjorden",
@@ -450,7 +480,8 @@
     "arcadia|construccion": 0.83,
     "shackleton_borde|construccion": 0.83
    },
-   "viaje_min": 4462.0
+   "viaje_min": 4462.0,
+   "modelo": null
   },
   {
    "nombre": "Valles Secos de McMurdo",
@@ -511,7 +542,70 @@
     "arcadia|construccion": 0.75,
     "shackleton_borde|construccion": 0.75
    },
-   "viaje_min": null
+   "viaje_min": null,
+   "modelo": null
+  },
+  {
+   "nombre": "Alta Guajira",
+   "zona": "colombia",
+   "tipo": "nuevo",
+   "lon": -71.875,
+   "lat": 12.105,
+   "procesado": true,
+   "valores": {
+    "pendiente_deg": 1.3996,
+    "rugosidad_m": 4.6893,
+    "lst_dia_K": 309.8234,
+    "lst_noche_K": 298.3917,
+    "amplitud_K": 11.4317,
+    "albedo": 0.2161,
+    "ati": 0.0686,
+    "aridez_P_PET": 0.1632,
+    "humedad_suelo_mm": 9.6342,
+    "precip_anual_mm": 359.5,
+    "ciclos_hielo_frac": 0.0,
+    "ndvi": 0.1983,
+    "cobertura": 1.0
+   },
+   "puntuacion": {
+    "arcadia|movilidad": 87.4,
+    "shackleton_borde|movilidad": 25.7,
+    "arcadia|construccion": 90.1,
+    "shackleton_borde|construccion": 50.0
+   },
+   "desglose": {
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.85,
+     "albedo": 0.89,
+     "ciclos_hielo_frac": 1.0
+    },
+    "shackleton_borde|movilidad": {
+     "pendiente_deg": 0.08,
+     "albedo": 0.83
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.85,
+     "albedo": 0.89,
+     "ciclos_hielo_frac": 1.0
+    },
+    "shackleton_borde|construccion": {
+     "pendiente_deg": 0.08,
+     "albedo": 0.83
+    }
+   },
+   "clase": {
+    "movilidad": "Marte",
+    "construccion": "Marte"
+   },
+   "filtrado": false,
+   "confianza": {
+    "arcadia|movilidad": 1.0,
+    "shackleton_borde|movilidad": 1.0,
+    "arcadia|construccion": 1.0,
+    "shackleton_borde|construccion": 1.0
+   },
+   "viaje_min": null,
+   "modelo": null
   },
   {
    "nombre": "Death Valley",
@@ -572,7 +666,15 @@
     "arcadia|construccion": 1.0,
     "shackleton_borde|construccion": 1.0
    },
-   "viaje_min": 140.0
+   "viaje_min": 140.0,
+   "modelo": {
+    "p_tierra": 0.271,
+    "p_marte": 0.654,
+    "p_luna": 0.075,
+    "clase": "Marte",
+    "en_rango": true
+   }
   }
- ]
+ ],
+ "modelo_presentable": false
 }

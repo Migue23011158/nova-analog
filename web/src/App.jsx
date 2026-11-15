@@ -8,7 +8,7 @@
  * Reglas: ningún número se inventa. Lo que no viene en sitios.json se muestra como SIN DATO.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, useMapEvents } from 'react-leaflet';
 import Globe from 'globe.gl';
 import { cargarModelo, clasificar as clasificarGMM } from './nova_gmm.js';
 import './App.css';
@@ -21,12 +21,49 @@ const REFS = {
   arcadia: {
     target: 'mars', cuerpo: 'Marte', nombre: 'Arcadia Planitia', corto: 'Arcadia',
     coords: '47.2° N, 184.3° E', img: 'arcadia.jpg', credito: 'NASA/JPL-Caltech/UArizona (HiRISE)',
+    lat: 47.2, lon: -175.7,
   },
   shackleton_borde: {
     target: 'moon', cuerpo: 'Luna', nombre: 'Borde de Shackleton', corto: 'Shackleton',
     coords: '89.67° S, 129.78° E', img: 'shackleton.jpg', credito: 'NASA/GSFC/Arizona State University (LROC)',
+    lat: -89.67, lon: 129.78,
   },
 };
+
+/* Cuerpos del globo de inicio. Marte y la Luna solo muestran su sitio de referencia (sin zoom ni arrastre).
+   Texturas en public/: marte_textura.jpg (Viking MDIM 2.1, NASA/USGS) y luna_textura.jpg (CGI Moon Kit, NASA SVS). */
+const CUERPOS = {
+  tierra: { nombre: 'Tierra' },
+  marte: { nombre: 'Marte', ref: 'arcadia', target: 'mars', textura: 'marte_textura.jpg', atm: '#E8743B' },
+  luna: { nombre: 'Luna', ref: 'shackleton_borde', target: 'moon', textura: 'luna_textura.jpg', atm: null },
+};
+
+/* Clase del modelo en cualquier punto de la Tierra: public/global_clases.bin (lo genera Richard).
+   uint8, fila 0 = 90° N, columna 0 = −180°, ancho = 2 × alto. Códigos según LEEME_web_datos.md. */
+const CLASES_BIN = { 1: 'Marte', 2: 'Luna', 3: 'Fuera de rango', 4: 'Ninguna' };
+const KIND_BIN = { 1: 'mars', 2: 'moon', 3: 'none', 4: 'none' };
+let gridPromesa = null;
+function cargarGrilla() {
+  if (!gridPromesa) {
+    gridPromesa = fetch(BASE + 'global_clases.bin')
+      .then((r) => { if (!r.ok) throw new Error('sin archivo'); return r.arrayBuffer(); })
+      .then((buf) => {
+        const datos = new Uint8Array(buf);
+        const W = Math.round(Math.sqrt(datos.length * 2));
+        const H = datos.length / W;
+        if (!Number.isInteger(H) || W !== 2 * H) throw new Error('formato inesperado');
+        return { datos, W, H };
+      })
+      .catch((e) => { gridPromesa = null; throw e; });
+  }
+  return gridPromesa;
+}
+function claseEnPunto(g, lat, lon) {
+  const lng = ((((lon + 180) % 360) + 360) % 360) - 180;
+  const fila = Math.min(g.H - 1, Math.max(0, Math.floor(((90 - lat) / 180) * g.H)));
+  const col = Math.min(g.W - 1, Math.max(0, Math.floor(((lng + 180) / 360) * g.W)));
+  return g.datos[fila * g.W + col];
+}
 const TARGET_TO_REF = { mars: 'arcadia', moon: 'shackleton_borde' };
 
 /* Valores físicos de cada referencia (columna derecha de las filas espejo).
@@ -49,6 +86,8 @@ const VALORES_REF_DOCUMENTADOS = {
 };
 
 /* Estado de novedad (verificacion-novedad.md, barrido del 14-nov). */
+const NOVEDAD_NOMBRE = { 'Alta Guajira': 'Nuevo (provisional)' };
+const novedadDe = (s) => NOVEDAD[s.zona] || NOVEDAD[s.zonaOrig] || NOVEDAD_NOMBRE[s.nombre];
 const NOVEDAD = {
   cocuy: 'Nuevo (provisional)',
   bayuda: 'Nuevo (provisional)',
@@ -66,7 +105,10 @@ const VARS = {
 const NOMBRE_CORTO = {
   cocuy: 'Colombia', bayuda: 'Sudán', khaybar: 'Arabia Saudita', undara: 'Australia', atacama: 'Chile',
   devon: 'Canadá', svalbard: 'Noruega', mcmurdo: 'Antártida', mojave: 'EE. UU.',
+  colombia: 'Colombia', guajira: 'Colombia', deathvalley: 'EE. UU.', death_valley: 'EE. UU.',
 };
+const paisDe = (s) => NOMBRE_CORTO[s.zona] || NOMBRE_CORTO[s.zonaOrig] || '';
+const nivelDe = (c) => (c === undefined || c === null ? null : c >= 0.75 ? 'ALTA' : c >= 0.5 ? 'MEDIA' : 'BAJA');
 const SIN_CARRETERA = ['devon', 'mcmurdo'];
 const TIPO = { nuevo: 'Candidato nuevo', control: 'Control', conocido: 'Conocido', verificar: 'Por verificar' };
 const PROP_LABEL = { movilidad: 'Movilidad de róveres', construccion: 'Construcción' };
@@ -153,6 +195,11 @@ export default function App() {
   const [miPos, setMiPos] = useState(null);
   const [ayuda, setAyuda] = useState(false);
   const [modelo, setModelo] = useState(null);
+  const [cuerpo, setCuerpo] = useState('tierra');
+  const elegirCuerpo = (c) => {
+    setCuerpo(c);
+    if (CUERPOS[c].target) setTarget(CUERPOS[c].target);
+  };
 
   // Modelo final (GMM bayesiano con rechazo): public/nova_gmm.json
   useEffect(() => {
@@ -215,7 +262,11 @@ export default function App() {
 
   const sitios = useMemo(() => {
     if (!datos) return [];
-    return (datos.sitios || []).map((s) => {
+    const vistos = {};
+    return (datos.sitios || []).map((s0) => {
+      // Si dos sitios comparten zona (ej. dos puntos de Colombia), se les da un identificador único
+      const n = (vistos[s0.zona] = (vistos[s0.zona] || 0) + 1);
+      const s = n === 1 ? s0 : { ...s0, zonaOrig: s0.zona, zona: `${s0.zona}_${n}` };
       const kind = kindDe(s);
       const evaluable = kind !== 'pending' && kind !== 'unevaluated';
       const score = evaluable ? indiceRef(s, refKey) : null;
@@ -223,10 +274,13 @@ export default function App() {
         Object.entries(s.valores || {}).map(([k, v]) => [k, v === null || v === undefined ? v : Number(v)]),
       );
       const gmm = modelo ? clasificarGMM(modelo, valoresNum) : null;
-      return { ...s, kind, score, gmm };
+      const des = s.desglose?.[`${refKey}|${proposito}`] || {};
+      const nvars = variables.filter((v) => des[v] !== null && des[v] !== undefined).length;
+      const confNivel = nivelDe(s.confianza?.[`${refKey}|${proposito}`]);
+      return { ...s, kind, score, gmm, nvars, confNivel };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datos, pesos, proposito, refKey, refs, modelo]);
+  }, [datos, pesos, proposito, refKey, refs, modelo, variables]);
 
   const sel = sitios.find((s) => s.zona === zonaSel) || sitios[0];
 
@@ -297,15 +351,28 @@ export default function App() {
               <h1>Encuentra un pedazo de Marte o de la Luna en la Tierra.</h1>
               <p><b>1</b> Elige Marte o Luna <i /> <b>2</b> Elige un sitio <i /> <b>3</b> Compara</p>
             </div>
-            <span className="globe-hint">ARRASTRA PARA GIRAR · RUEDA PARA ACERCAR</span>
-            <EarthGlobe sitios={sitios} sel={sel} miPos={miPos}
+            <div className="segmented body-switch" role="tablist" aria-label="Cuerpo del globo">
+              {Object.entries(CUERPOS).map(([k, c]) => (
+                <button key={k} className={`${cuerpo === k ? 'active' : ''} b-${k}`} onClick={() => elegirCuerpo(k)}>
+                  <span /> {c.nombre}
+                </button>
+              ))}
+            </div>
+            {cuerpo === 'tierra' && <span className="globe-hint">ARRASTRA PARA GIRAR · RUEDA PARA ACERCAR</span>}
+            <EarthGlobe sitios={sitios} sel={sel} miPos={miPos} cuerpo={cuerpo}
               onSelect={(z) => setZonaSel(z)} onCompare={() => abrirComparar()} />
           </section>
           <aside className="explore-sidebar">
-            <SitesList sitios={sitios} sel={sel} miPos={miPos} pedirUbicacion={pedirUbicacion}
-              onSelect={(z) => setZonaSel(z)} onCompare={abrirComparar} />
-            <Weights variables={variables} pesos={pesos} setPesos={setPesos} propositos={Object.keys(datos.pesos || {})}
-              proposito={proposito} cambiarProposito={cambiarProposito} restablecer={restablecer} />
+            {cuerpo === 'tierra' ? (
+              <>
+                <SitesList sitios={sitios} sel={sel} miPos={miPos} pedirUbicacion={pedirUbicacion}
+                  onSelect={(z) => setZonaSel(z)} onCompare={abrirComparar} />
+                <Weights variables={variables} pesos={pesos} setPesos={setPesos} propositos={Object.keys(datos.pesos || {})}
+                  proposito={proposito} cambiarProposito={cambiarProposito} restablecer={restablecer} />
+              </>
+            ) : (
+              <Parecidos sitios={sitios} cuerpo={cuerpo} onCompare={abrirComparar} />
+            )}
           </aside>
         </main>
       ) : (
@@ -318,7 +385,8 @@ export default function App() {
 
       <footer className="credits">
         Desarrollado con ayuda de IA (Claude y Gemini) · NASA Space Apps Challenge 2026 · Datos: NASA, ESA, USGS ·
-        Imágenes: Esri World Imagery (mapa y globo), {REFS.arcadia.credito}, {REFS.shackleton_borde.credito}.
+        Imágenes: Esri World Imagery (mapa y globo), {REFS.arcadia.credito}, {REFS.shackleton_borde.credito},
+        globo de Marte: NASA/JPL/USGS (Viking MDIM 2.1), globo de la Luna: NASA/GSFC SVS (CGI Moon Kit, LROC).
         El índice de similitud (0–100) no es una probabilidad; se calcula a 1 km por celda.
       </footer>
     </div>
@@ -328,7 +396,7 @@ export default function App() {
 /* =====================================================================================
    Explorar: globo 3D real (globe.gl)
    ===================================================================================== */
-function EarthGlobe({ sitios, sel, miPos, onSelect, onCompare }) {
+function EarthGlobe({ sitios, sel, miPos, cuerpo = 'tierra', onSelect, onCompare }) {
   const ref = useRef(null);
   const globeRef = useRef(null);
   const [fallo, setFallo] = useState(false);
@@ -376,10 +444,41 @@ function EarthGlobe({ sitios, sel, miPos, onSelect, onCompare }) {
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
 
-  // Actualizar marcadores cuando cambian los datos o la selección
+  const cfg = CUERPOS[cuerpo];
+  const refC = cfg.ref ? REFS[cfg.ref] : null;
+
+  // Piel del globo: fotos de Esri (Tierra) o textura de Marte / la Luna (fija, sin zoom ni arrastre)
   useEffect(() => {
     const g = globeRef.current;
     if (!g) return;
+    const ctr = g.controls();
+    if (cuerpo === 'tierra') {
+      g.globeImageUrl(null);
+      g.globeTileEngineUrl((x, y, l) => ESRI.replace('{z}', l).replace('{y}', y).replace('{x}', x));
+      g.showAtmosphere(true).atmosphereColor('#3BA3FF').atmosphereAltitude(0.18);
+      ctr.enableRotate = true; ctr.enableZoom = true;
+    } else {
+      g.globeTileEngineUrl(null);
+      g.globeImageUrl(BASE + cfg.textura);
+      if (cfg.atm) g.showAtmosphere(true).atmosphereColor(cfg.atm).atmosphereAltitude(0.08);
+      else g.showAtmosphere(false);
+      ctr.autoRotate = false; ctr.enableRotate = false; ctr.enableZoom = false;
+    }
+  }, [cuerpo]);
+
+  // Actualizar marcadores cuando cambian los datos, la selección o el cuerpo
+  useEffect(() => {
+    const g = globeRef.current;
+    if (!g) return;
+    if (refC) {
+      // Marte o Luna: solo el sitio de referencia. No se acerca: misma distancia que la Tierra.
+      g.pointsData([{ lat: refC.lat, lon: refC.lon, color: '#FFFFFF', alt: 0.05, r: 1.3,
+        label: `<div style="font:11px Space Grotesk;background:#0b111c;border:1px solid #2a3a50;padding:6px 8px;border-radius:8px;color:#eef4ff">${refC.nombre}<br><span style="color:#9fb3c8">${refC.coords}</span></div>` }]);
+      g.ringsData([{ lat: refC.lat, lon: refC.lon }]);
+      // Shackleton está en el polo: se inclina la vista para que el marcador se vea
+      g.pointOfView({ lat: Math.max(-62, Math.min(62, refC.lat)), lng: refC.lon, altitude: 2.9 }, 900);
+      return;
+    }
     const pts = sitios.map((s) => ({
       zona: s.zona, lat: s.lat, lon: s.lon,
       color: COLOR[s.kind],
@@ -392,7 +491,7 @@ function EarthGlobe({ sitios, sel, miPos, onSelect, onCompare }) {
     g.pointsData(pts);
     g.ringsData([{ lat: sel.lat, lon: sel.lon }]);
     g.pointOfView({ lat: sel.lat, lng: sel.lon, altitude: 2.9 }, 900);
-  }, [sitios, sel, miPos]);
+  }, [sitios, sel, miPos, cuerpo]);
 
   return (
     <div className="globe-area">
@@ -403,23 +502,79 @@ function EarthGlobe({ sitios, sel, miPos, onSelect, onCompare }) {
       ) : (
         <div className="globe-gl" ref={ref} />
       )}
-      <GlassCard className="marker-card">
-        <small>{fmtCoord(sel.lat, sel.lon)}</small>
-        <strong>{sel.nombre}</strong>
-        <div>
-          <ClassPill kind={sel.kind} long />
-          <b>{sel.score !== null ? sel.score.toFixed(0) : '—'}</b>
-        </div>
-        <button onClick={onCompare}>Comparar <Icon name="arrow" size={13} /></button>
-      </GlassCard>
-      <GlassCard className="legend">
+      {refC ? (
+        <GlassCard className="marker-card ref-card">
+          <small>{cfg.nombre.toUpperCase()} · SITIO DE REFERENCIA</small>
+          <strong>{refC.nombre}</strong>
+          <p className="marker-meta">{refC.coords}</p>
+          <p className="marker-meta">Mira la lista: lugares de la Tierra que ya analizamos y se le parecen.</p>
+        </GlassCard>
+      ) : (
+        <GlassCard className="marker-card">
+          <small>{fmtCoord(sel.lat, sel.lon)}</small>
+          <strong>{sel.nombre}</strong>
+          <div>
+            <ClassPill kind={sel.kind} long />
+            <b>{sel.score !== null ? sel.score.toFixed(0) : '—'}</b>
+          </div>
+          {sel.kind !== 'pending' && sel.kind !== 'unevaluated' && (
+            <p className="marker-meta" title="Variables con dato que entran al índice, y confianza según los datos disponibles">
+              {sel.nvars} variables · confianza {sel.confNivel ? sel.confNivel.toLowerCase() : 'sin dato'}
+            </p>
+          )}
+          <button onClick={onCompare}>Comparar <Icon name="arrow" size={13} /></button>
+        </GlassCard>
+      )}
+      {cuerpo === 'tierra' && <GlassCard className="legend">
         <span><i className="mars" /> Marte</span>
         <span><i className="moon" /> Luna</span>
         <span><i className="none" /> No coincide</span>
         <span><i className="pending" /> Pendiente de procesar</span>
         <span><i className="unevaluated" /> No evaluado</span>
-      </GlassCard>
+      </GlassCard>}
     </div>
+  );
+}
+
+/* ---------- Marte / Luna: lugares de la Tierra ya analizados que se le parecen ---------- */
+function Parecidos({ sitios, cuerpo, onCompare }) {
+  const cfg = CUERPOS[cuerpo];
+  const ref = REFS[cfg.ref];
+  const kind = cfg.target;
+  const claseModelo = cuerpo === 'marte' ? 'Marte' : 'Luna';
+  const lista = sitios
+    .filter((s) => s.kind === kind || s.gmm?.clase_final === claseModelo)
+    .sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
+  return (
+    <GlassCard className="sites-card parecidos">
+      <div className="card-heading">
+        <div><small>YA ANALIZADOS · SUGERENCIAS</small><h2>En la Tierra se parecen a {cuerpo === 'marte' ? 'Marte' : 'la Luna'}</h2></div>
+        <span>ÍNDICE VS. {ref.corto.toUpperCase()}</span>
+      </div>
+      <p className="parecidos-nota">
+        Resultados ya calculados con el índice y el modelo: no es una búsqueda nueva. Toca un sitio para compararlo con {ref.nombre}.
+      </p>
+      <div className="site-list">
+        {lista.length === 0 && <p className="parecidos-nota">Ningún sitio analizado coincide todavía.</p>}
+        {lista.map((s, i) => (
+          <button key={s.zona} onClick={() => onCompare(s.zona)}>
+            <span className="rank">{String(i + 1).padStart(2, '0')}</span>
+            <span className="site-list-copy">
+              <strong>{s.nombre}</strong>
+              <small>{paisDe(s)}{novedadDe(s) ? ` · ${novedadDe(s)}` : s.tipo === 'control' ? ' · Control' : ''}</small>
+              <span className="parecidos-tags">
+                {s.kind === kind && <span className={`tag ${kind}`}>Índice: {claseModelo}</span>}
+                {s.gmm?.clase_final === claseModelo && <span className={`tag ${kind}`}>Modelo: {claseModelo}</span>}
+              </span>
+            </span>
+            <span className="list-result">
+              <b>{s.score !== null ? s.score.toFixed(0) : '—'}</b>
+              <small>/ 100</small>
+            </span>
+          </button>
+        ))}
+      </div>
+    </GlassCard>
   );
 }
 
@@ -468,7 +623,7 @@ function SitesList({ sitios, sel, miPos, pedirUbicacion, onSelect, onCompare }) 
             <span className="rank">{String(i + 1).padStart(2, '0')}</span>
             <span className="site-list-copy">
               <strong>{s.nombre}</strong>
-              <small>{NOMBRE_CORTO[s.zona] || ''}{NOVEDAD[s.zona] ? ` · ${NOVEDAD[s.zona]}` : s.tipo === 'control' ? ' · Control' : ''}</small>
+              <small>{paisDe(s)}{novedadDe(s) ? ` · ${novedadDe(s)}` : s.tipo === 'control' ? ' · Control' : ''}</small>
               <ClassPill kind={s.kind} long />
             </span>
             <span className="list-result">
@@ -520,6 +675,14 @@ function Weights({ variables, pesos, setPesos, propositos, proposito, cambiarPro
 function CompareView({ datos, sitios, sel, target, refKey, refs, variables, proposito, umbral, indiceRef, onSelect }) {
   const ref = REFS[refKey];
   const evaluable = sel.kind !== 'pending' && sel.kind !== 'unevaluated';
+  const [punto, setPunto] = useState(null);   // ubicación a gusto (solo Tierra)
+  useEffect(() => setPunto(null), [sel.zona]);
+  const elegirPunto = (lat, lon) => {
+    setPunto({ lat, lon, estado: 'cargando' });
+    cargarGrilla()
+      .then((g) => setPunto({ lat, lon, estado: 'ok', codigo: claseEnPunto(g, lat, lon), km: Math.round((360 / g.W) * 111) }))
+      .catch(() => setPunto({ lat, lon, estado: 'error' }));
+  };
   const des = sel.desglose?.[`${refKey}|${proposito}`] || {};
   const conf = sel.confianza?.[`${refKey}|${proposito}`];
   const valoresRef = { ...(VALORES_REF_DOCUMENTADOS[refKey] || {}) };
@@ -577,7 +740,7 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
     conclusion += '.';
   }
 
-  const nivelConf = conf === undefined || conf === null ? null : conf >= 0.75 ? 'ALTA' : conf >= 0.5 ? 'MEDIA' : 'BAJA';
+  const nivelConf = nivelDe(conf);
   const score = evaluable ? indiceRef(sel, refKey) : null;
   const otrosIndices = refs.map((rk) => ({ rk, x: evaluable ? indiceRef(sel, rk) : null }));
 
@@ -588,20 +751,26 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
         <section className="site-panel earth">
           <div className="site-heading">
             <span className="eyebrow">TIERRA</span>
-            <span className="image-meta">IMAGEN SATELITAL · ZOOM CON LA RUEDA</span>
+            <span className="image-meta">TOCA EL MAPA PARA CONSULTAR CUALQUIER PUNTO</span>
           </div>
           <div className="site-image">
             <MapContainer key={sel.zona} center={[sel.lat, sel.lon]} zoom={10} minZoom={3}
               zoomControl={false} attributionControl={false} style={{ height: '100%', width: '100%' }}>
               <TileLayer url={ESRI} />
+              <ClickPunto onPick={elegirPunto} />
+              {punto && (
+                <CircleMarker center={[punto.lat, punto.lon]} radius={9}
+                  pathOptions={{ color: '#ffffff', weight: 2, fillColor: punto.estado === 'ok' ? COLOR[KIND_BIN[punto.codigo]] || COLOR.pending : COLOR.pending, fillOpacity: 0.9 }} />
+              )}
             </MapContainer>
+            {punto && <PuntoCard punto={punto} onClose={() => setPunto(null)} />}
             <span className="corner tl" /><span className="corner tr" />
             <span className="corner bl" /><span className="corner br" />
             <span className="credit">Esri World Imagery</span>
           </div>
           <div className="site-caption">
             <div><h2>{sel.nombre}</h2><p>{fmtCoord(sel.lat, sel.lon)}</p></div>
-            <span className="site-chip">{NOVEDAD[sel.zona] || TIPO[sel.tipo] || sel.tipo}</span>
+            <span className="site-chip">{novedadDe(sel) || TIPO[sel.tipo] || sel.tipo}</span>
           </div>
         </section>
 
@@ -637,6 +806,12 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
               <span key={o.rk}>{i > 0 && ' · '}{REFS[o.rk]?.cuerpo} {o.x === null ? '—' : o.x.toFixed(0)}</span>
             ))} · clase si ≥ {umbral}
           </small>
+          {evaluable && (
+            <small className="score-note" title="Variables con dato que entran al índice">
+              {filas.filter((f) => !f.noAplica && f.sim !== null).length} variables · confianza {nivelConf ? nivelConf.toLowerCase() : 'sin dato'}
+            </small>
+          )}
+          <small className="score-note">Índice de similitud 0–100 · no es una probabilidad</small>
         </div>
       </div>
 
@@ -685,7 +860,13 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
                 <div className="metric-center">
                   <div className="metric-head"><span>{f.label}</span><b>{falta ? '—' : `${pct}%`}</b></div>
                   {falta ? (
-                    <div className="missing-track"><i /> {f.noAplica ? 'NO APLICA' : f.fueraIndice ? 'NO ENTRA AL ÍNDICE' : 'SIN DATO'} <i /></div>
+                    <div className="missing-track" title={
+                      f.noAplica ? 'Esta variable no existe en la Luna: no se compara.'
+                        : f.fueraIndice && f.v === 'ati' ? 'La Tierra usa inercia térmica aparente (ATI) y Marte o la Luna unidades SI: no se pueden comparar número a número.'
+                        : f.fueraIndice ? 'Esta variable se muestra como contexto, pero no se evalúa en el índice.'
+                        : 'No hay dato de esta variable en este sitio: no entra al índice y baja la confianza.'}>
+                      <i /> {f.noAplica ? 'NO APLICA' : f.fueraIndice && f.v === 'ati' ? 'SIN DATO COMPARABLE' : f.fueraIndice ? 'NO SE EVALÚA' : 'SIN DATO EN ESTE SITIO'} <i />
+                    </div>
                   ) : (
                     <div className={`similarity ${target}`}><span style={{ width: `${pct}%` }} /><i style={{ left: `${pct}%` }} /></div>
                   )}
@@ -729,7 +910,42 @@ function Failure({ icon, title, text }) {
   return (
     <div className="failure">
       <span><Icon name={icon} size={21} /></span>
-      <div><strong>{title}</strong><p>{text}</p></div>
+      <div>
+        <strong>{title}</strong><p>{text}</p>
+        <em className="na-tag" title="Ningún lugar de la Tierra lo reproduce: no se puntúa.">No aplica</em>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Ubicación a gusto: clic en el mapa de la Tierra ---------- */
+function ClickPunto({ onPick }) {
+  const map = useMapEvents({
+    click(e) {
+      onPick(e.latlng.lat, e.latlng.lng);
+      map.flyTo(e.latlng, Math.max(map.getZoom(), 9), { duration: 0.8 });
+    },
+  });
+  return null;
+}
+
+function PuntoCard({ punto, onClose }) {
+  let titulo, kind, nota;
+  if (punto.estado === 'cargando') { titulo = 'Consultando…'; kind = 'pending'; }
+  else if (punto.estado === 'error') { titulo = 'Sin dato'; kind = 'pending'; nota = 'No se pudo leer global_clases.bin.'; }
+  else if (CLASES_BIN[punto.codigo]) {
+    titulo = CLASES_BIN[punto.codigo]; kind = KIND_BIN[punto.codigo];
+    nota = punto.codigo === 3 ? 'Pasa el filtro, pero está fuera de lo que el modelo conoce de Marte y de la Luna.'
+      : punto.codigo === 4 ? 'Pasa el filtro, pero no se parece ni a Marte ni a la Luna.'
+      : `Su pendiente y su albedo se parecen más a ${titulo === 'Marte' ? 'Marte' : 'la Luna'} que a lo demás.`;
+  } else { titulo = 'No pasa el filtro'; kind = 'unevaluated'; nota = 'Zona húmeda, con vegetación, océano o sin dato.'; }
+  return (
+    <div className="punto-card">
+      <button className="punto-close" onClick={onClose} aria-label="Cerrar">×</button>
+      <small>PUNTO ELEGIDO · {fmtCoord(punto.lat, punto.lon)}</small>
+      <strong style={{ color: COLOR[kind] }}>El modelo dice: {titulo}</strong>
+      {nota && <p>{nota}</p>}
+      <p className="punto-escala">Resultado ya calculado para la celda{punto.km ? ` de ~${punto.km} km` : ''} que contiene el punto. No es un estudio del sitio.</p>
     </div>
   );
 }
