@@ -1,0 +1,392 @@
+{
+ "umbral_clase": 60,
+ "referencias": [
+  "shackleton_borde",
+  "arcadia"
+ ],
+ "variables": [
+  "pendiente_deg",
+  "ati",
+  "albedo",
+  "ciclos_hielo_frac"
+ ],
+ "pesos": {
+  "movilidad": {
+   "pendiente_deg": 0.5,
+   "ati": 0.25,
+   "albedo": 0.15,
+   "ciclos_hielo_frac": 0.1
+  },
+  "construccion": {
+   "pendiente_deg": 0.2,
+   "ati": 0.4,
+   "albedo": 0.25,
+   "ciclos_hielo_frac": 0.15
+  }
+ },
+ "sitios": [
+  {
+   "nombre": "Sierra Nevada del Cocuy",
+   "zona": "cocuy",
+   "tipo": "nuevo",
+   "lon": -72.33,
+   "lat": 6.45,
+   "procesado": false,
+   "valores": {},
+   "puntuacion": {},
+   "desglose": {},
+   "clase": {},
+   "filtrado": null,
+   "confianza": {},
+   "viaje_min": 181.0
+  },
+  {
+   "nombre": "Campo volcánico de Bayuda",
+   "zona": "bayuda",
+   "tipo": "nuevo",
+   "lon": 32.75,
+   "lat": 18.33,
+   "procesado": false,
+   "valores": {},
+   "puntuacion": {},
+   "desglose": {},
+   "clase": {},
+   "filtrado": null,
+   "confianza": {},
+   "viaje_min": 859.0
+  },
+  {
+   "nombre": "Harrat Khaybar",
+   "zona": "khaybar",
+   "tipo": "nuevo",
+   "lon": 39.9,
+   "lat": 25.5,
+   "procesado": false,
+   "valores": {},
+   "puntuacion": {},
+   "desglose": {},
+   "clase": {},
+   "filtrado": null,
+   "confianza": {},
+   "viaje_min": 450.0
+  },
+  {
+   "nombre": "Tubos de lava de Undara",
+   "zona": "undara",
+   "tipo": "nuevo",
+   "lon": 144.6,
+   "lat": -18.25,
+   "procesado": false,
+   "valores": {},
+   "puntuacion": {},
+   "desglose": {},
+   "clase": {},
+   "filtrado": null,
+   "confianza": {},
+   "viaje_min": 215.0
+  },
+  {
+   "nombre": "Atacama, Yungay",
+   "zona": "atacama",
+   "tipo": "control",
+   "lon": -70.0,
+   "lat": -24.1,
+   "procesado": true,
+   "valores": {
+    "pendiente_deg": 1.7837,
+    "rugosidad_m": 8.4587,
+    "lst_dia_K": 315.7829,
+    "lst_noche_K": 282.7701,
+    "amplitud_K": 33.0128,
+    "albedo": 0.2627,
+    "ati": 0.0223,
+    "aridez_P_PET": 0.0001,
+    "humedad_suelo_mm": 0.0,
+    "cobertura": 1.0
+   },
+   "puntuacion": {
+    "shackleton_borde|movilidad": 54.6,
+    "arcadia|movilidad": 93.1,
+    "shackleton_borde|construccion": 61.7,
+    "arcadia|construccion": 90.6
+   },
+   "desglose": {
+    "shackleton_borde|movilidad": {
+     "pendiente_deg": 0.44,
+     "ati": 0.97,
+     "albedo": 0.19
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.96,
+     "ati": 0.97,
+     "albedo": 0.76
+    },
+    "shackleton_borde|construccion": {
+     "pendiente_deg": 0.44,
+     "ati": 0.97,
+     "albedo": 0.19
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.96,
+     "ati": 0.97,
+     "albedo": 0.76
+    }
+   },
+   "clase": {
+    "movilidad": "Marte",
+    "construccion": "Marte"
+   },
+   "filtrado": false,
+   "confianza": {
+    "shackleton_borde|movilidad": 1.0,
+    "arcadia|movilidad": 1.0,
+    "shackleton_borde|construccion": 1.0,
+    "arcadia|construccion": 1.0
+   },
+   "viaje_min": 211.0
+  },
+  {
+   "nombre": "Cráter Haughton, isla Devon",
+   "zona": "devon",
+   "tipo": "control",
+   "lon": -89.8,
+   "lat": 75.4,
+   "procesado": true,
+   "valores": {
+    "pendiente_deg": 3.4517,
+    "rugosidad_m": 10.5138,
+    "lst_dia_K": 278.5343,
+    "lst_noche_K": 274.0615,
+    "amplitud_K": 4.4728,
+    "albedo": null,
+    "ati": null,
+    "aridez_P_PET": 1.9651,
+    "humedad_suelo_mm": 7.8283,
+    "precip_anual_mm": 198.9384,
+    "cobertura": 0.8
+   },
+   "puntuacion": {
+    "shackleton_borde|movilidad": 60.2,
+    "arcadia|movilidad": 87.2,
+    "shackleton_borde|construccion": 60.2,
+    "arcadia|construccion": 87.2
+   },
+   "desglose": {
+    "shackleton_borde|movilidad": {
+     "pendiente_deg": 0.6,
+     "ati": null,
+     "albedo": null
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.87,
+     "ati": null,
+     "albedo": null
+    },
+    "shackleton_borde|construccion": {
+     "pendiente_deg": 0.6,
+     "ati": null,
+     "albedo": null
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.87,
+     "ati": null,
+     "albedo": null
+    }
+   },
+   "clase": {
+    "movilidad": "Marte",
+    "construccion": "Marte"
+   },
+   "filtrado": false,
+   "confianza": {
+    "shackleton_borde|movilidad": 0.44,
+    "arcadia|movilidad": 0.44,
+    "shackleton_borde|construccion": 0.19,
+    "arcadia|construccion": 0.19
+   },
+   "viaje_min": 8113.0
+  },
+  {
+   "nombre": "Svalbard, Bockfjorden",
+   "zona": "svalbard",
+   "tipo": "conocido",
+   "lon": 13.33,
+   "lat": 79.43,
+   "procesado": true,
+   "valores": {
+    "pendiente_deg": 12.5092,
+    "rugosidad_m": 58.3648,
+    "lst_dia_K": 278.3722,
+    "lst_noche_K": 276.0687,
+    "amplitud_K": 2.3035,
+    "albedo": 0.1881,
+    "ati": 0.3773,
+    "aridez_P_PET": 6.9694,
+    "humedad_suelo_mm": 9.9942,
+    "precip_anual_mm": 572.385,
+    "cobertura": 0.9
+   },
+   "puntuacion": {
+    "shackleton_borde|movilidad": null,
+    "arcadia|movilidad": null,
+    "shackleton_borde|construccion": null,
+    "arcadia|construccion": null
+   },
+   "desglose": {
+    "shackleton_borde|movilidad": {
+     "pendiente_deg": 0.39,
+     "ati": 0.0,
+     "albedo": 0.73
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.32,
+     "ati": 0.0,
+     "albedo": 0.8
+    },
+    "shackleton_borde|construccion": {
+     "pendiente_deg": 0.39,
+     "ati": 0.0,
+     "albedo": 0.73
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.32,
+     "ati": 0.0,
+     "albedo": 0.8
+    }
+   },
+   "clase": {
+    "movilidad": null,
+    "construccion": null
+   },
+   "filtrado": true,
+   "confianza": {
+    "shackleton_borde|movilidad": 0.9,
+    "arcadia|movilidad": 0.9,
+    "shackleton_borde|construccion": 0.9,
+    "arcadia|construccion": 0.9
+   },
+   "viaje_min": 4462.0
+  },
+  {
+   "nombre": "Valles Secos de McMurdo",
+   "zona": "mcmurdo",
+   "tipo": "control",
+   "lon": 161.8,
+   "lat": -77.5,
+   "procesado": true,
+   "valores": {
+    "pendiente_deg": 14.4516,
+    "rugosidad_m": 75.6274,
+    "lst_dia_K": 263.4138,
+    "lst_noche_K": 259.4031,
+    "amplitud_K": 4.0107,
+    "albedo": 0.0895,
+    "ati": 0.2565,
+    "aridez_P_PET": null,
+    "humedad_suelo_mm": 50.0,
+    "precip_anual_mm": 173.4879,
+    "cobertura": 0.9
+   },
+   "puntuacion": {
+    "shackleton_borde|movilidad": 42.4,
+    "arcadia|movilidad": 5.3,
+    "shackleton_borde|construccion": 31.0,
+    "arcadia|construccion": 5.7
+   },
+   "desglose": {
+    "shackleton_borde|movilidad": {
+     "pendiente_deg": 0.59,
+     "ati": 0.0,
+     "albedo": 0.58
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.05,
+     "ati": 0.0,
+     "albedo": 0.15
+    },
+    "shackleton_borde|construccion": {
+     "pendiente_deg": 0.59,
+     "ati": 0.0,
+     "albedo": 0.58
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.05,
+     "ati": 0.0,
+     "albedo": 0.15
+    }
+   },
+   "clase": {
+    "movilidad": "no coincide",
+    "construccion": "no coincide"
+   },
+   "filtrado": false,
+   "confianza": {
+    "shackleton_borde|movilidad": 0.9,
+    "arcadia|movilidad": 0.9,
+    "shackleton_borde|construccion": 0.9,
+    "arcadia|construccion": 0.9
+   },
+   "viaje_min": null
+  },
+  {
+   "nombre": "Death Valley",
+   "zona": "mojave",
+   "tipo": "control",
+   "lon": -116.9,
+   "lat": 36.5,
+   "procesado": true,
+   "valores": {
+    "pendiente_deg": 0.3815,
+    "rugosidad_m": 0.8545,
+    "lst_dia_K": 310.9052,
+    "lst_noche_K": 295.1492,
+    "amplitud_K": 15.7559,
+    "albedo": 0.2573,
+    "ati": 0.0471,
+    "aridez_P_PET": 0.0183,
+    "humedad_suelo_mm": 0.0,
+    "cobertura": 1.0
+   },
+   "puntuacion": {
+    "shackleton_borde|movilidad": 26.2,
+    "arcadia|movilidad": 62.2,
+    "shackleton_borde|construccion": 22.4,
+    "arcadia|construccion": 45.3
+   },
+   "desglose": {
+    "shackleton_borde|movilidad": {
+     "pendiente_deg": 0.32,
+     "ati": 0.18,
+     "albedo": 0.22
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.86,
+     "ati": 0.03,
+     "albedo": 0.81
+    },
+    "shackleton_borde|construccion": {
+     "pendiente_deg": 0.32,
+     "ati": 0.18,
+     "albedo": 0.22
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.86,
+     "ati": 0.03,
+     "albedo": 0.81
+    }
+   },
+   "clase": {
+    "movilidad": "Marte",
+    "construccion": "no coincide"
+   },
+   "filtrado": false,
+   "confianza": {
+    "shackleton_borde|movilidad": 1.0,
+    "arcadia|movilidad": 1.0,
+    "shackleton_borde|construccion": 1.0,
+    "arcadia|construccion": 1.0
+   },
+   "viaje_min": 140.0
+  }
+ ]
+}
