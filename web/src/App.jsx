@@ -42,7 +42,7 @@ const EN = {
   'Ninguna': 'None', 'Ninguna (fuera de rango)': 'None (out of range)', 'Ninguna (filtro: húmedo o con vegetación)': 'None (filter: wet or vegetated)',
   'Fuera de rango': 'Out of range', 'SIN DATO': 'NO DATA', 'Sin dato': 'No data', 'sin dato': 'no data', 'Cargando…': 'Loading…',
   // Novedad, tipo, países
-  'Nuevo (provisional)': 'New (provisional)', 'Nuevo como estudio': 'New as a study', 'Sin verificar': 'Not verified',
+  'Nuevo (provisional)': 'New (provisional)', 'Candidato (citado en literatura)': 'Candidate (cited in literature)', 'Nuevo como estudio': 'New as a study', 'Sin verificar': 'Not verified',
   'Candidato nuevo': 'New candidate', 'Control': 'Control', 'Conocido': 'Known', 'Por verificar': 'To verify',
   'Sudán': 'Sudan', 'Arabia Saudita': 'Saudi Arabia', 'Canadá': 'Canada', 'Noruega': 'Norway', 'Antártida': 'Antarctica', 'EE. UU.': 'USA',
   // Sitios (nombres)
@@ -195,7 +195,8 @@ const VALORES_REF_DOCUMENTADOS = {
 };
 
 /* Estado de novedad (verificacion-novedad.md, barrido del 14-nov). */
-const NOVEDAD_NOMBRE = tabla({ 'Alta Guajira': 'Nuevo (provisional)' });
+// Guajira: ya citada en Bolívar-Torres et al. 2026 (Int. J. Astrobiology) → candidata, no "nueva"
+const NOVEDAD_NOMBRE = tabla({ 'Alta Guajira': 'Candidato (citado en literatura)' });
 const novedadDe = (s) => NOVEDAD[s.zona] || NOVEDAD[s.zonaOrig] || NOVEDAD_NOMBRE[s.nombre];
 const NOVEDAD = tabla({
   cocuy: 'Nuevo (provisional)',

@@ -1958,3 +1958,4 @@ small, .image-meta, .eyebrow, .site-caption p, .metric-value small, .metric-head
   /* En español el título ocupa dos líneas y no queda espacio: se oculta la ayuda (arrastrar sigue funcionando) */
   html[lang="es"] .globe-hint { display: none; }
 }
+/* v7.9 */
