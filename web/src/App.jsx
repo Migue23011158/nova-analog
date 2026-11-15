@@ -8,7 +8,7 @@
  * Reglas: ningún número se inventa. Lo que no viene en sitios.json se muestra como SIN DATO.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Rectangle, Tooltip, useMapEvents } from 'react-leaflet';
 import Globe from 'globe.gl';
 import { cargarModelo, clasificar as clasificarGMM } from './nova_gmm.js';
 import './App.css';
@@ -42,7 +42,7 @@ const EN = {
   'Ninguna': 'None', 'Ninguna (fuera de rango)': 'None (out of range)', 'Ninguna (filtro: húmedo o con vegetación)': 'None (filter: wet or vegetated)',
   'Fuera de rango': 'Out of range', 'SIN DATO': 'NO DATA', 'Sin dato': 'No data', 'sin dato': 'no data', 'Cargando…': 'Loading…',
   // Novedad, tipo, países
-  'Nuevo (provisional)': 'New (provisional)', 'Candidato (citado en literatura)': 'Candidate (cited in literature)', 'Nuevo como estudio': 'New as a study', 'Sin verificar': 'Not verified',
+  'Nuevo (provisional)': 'New (provisional)', 'Candidato (citado en literatura)': 'Candidate (cited in literature)', 'Candidato a revisar': 'Candidate to review', 'Rechazado por el modelo': 'Rejected by the model', 'Candidato (sin estudio previo)': 'Candidate (no prior study)', 'Nuevo como estudio': 'New as a study', 'Sin verificar': 'Not verified',
   'Candidato nuevo': 'New candidate', 'Control': 'Control', 'Conocido': 'Known', 'Por verificar': 'To verify',
   'Sudán': 'Sudan', 'Arabia Saudita': 'Saudi Arabia', 'Canadá': 'Canada', 'Noruega': 'Norway', 'Antártida': 'Antarctica', 'EE. UU.': 'USA',
   // Sitios (nombres)
@@ -54,7 +54,7 @@ const EN = {
   'Mejor puntaje': 'Best score', 'Cerca de mí': 'Near me', 'sin acceso por carretera': 'no road access',
   '~{n} días de ti': '~{n} days from you', '~{n} h de ti': '~{n} h from you', 'acceso {n}': 'access {n}', 'acceso SIN DATO': 'access NO DATA',
   '{n} días': '{n} days',
-  'MODELO ACTIVO': 'ACTIVE MODEL', 'Pesos por variable': 'Weights by variable', 'PESOS RELATIVOS': 'RELATIVE WEIGHTS',
+  'MODELO ACTIVO': 'ACTIVE MODEL', 'ÍNDICE DE SIMILITUD': 'SIMILARITY INDEX', 'Pesos por variable': 'Weights by variable', 'PESOS RELATIVOS': 'RELATIVE WEIGHTS',
   'El índice divide por la suma de pesos: solo importa la proporción entre ellos': 'The index divides by the sum of weights: only their proportion matters',
   'Restablecer': 'Reset', 'Movilidad de róveres': 'Rover mobility', 'Construcción': 'Construction',
   // Variables
@@ -72,7 +72,9 @@ const EN = {
   // Comparar
   'TIERRA': 'EARTH', 'TOCA EL MAPA PARA CONSULTAR CUALQUIER PUNTO': 'TAP THE MAP TO CHECK ANY POINT', 'IMAGEN ORBITAL': 'ORBITAL IMAGE',
   'Imagen orbital de {r}': 'Orbital image of {r}',
-  'SIMILITUD CON {r}': 'SIMILARITY TO {r}', 'Clase del sitio: {c}': 'Site class: {c}',
+  'SIMILITUD CON {r}': 'SIMILARITY TO {r}', 'Pesos del índice': 'Index weights',
+  'Ajustan el puntaje 0–100. El modelo entrenado usa solo pendiente y albedo.': 'They tune the 0–100 score. The trained model uses only slope and albedo.',
+  'Área analizada: 3 × 3 km': 'Analyzed area: 3 × 3 km', 'Celda del modelo (~{n} km)': 'Model cell (~{n} km)', 'Clase del sitio: {c}': 'Site class: {c}',
   'mejor coincidencia: {r} {n}': 'best match: {r} {n}', 'clase si ≥ {n}': 'class if ≥ {n}',
   '{n} variables · confianza {c}': '{n} variables · confidence {c}', 'Variables con dato que entran al índice': 'Variables with data that enter the index',
   'Variables con dato que entran al índice, y confianza según los datos disponibles': 'Variables with data that enter the index, and confidence given the available data',
@@ -167,6 +169,19 @@ function cargarGrilla() {
   }
   return gridPromesa;
 }
+function celdaEnPunto(g, lat, lon) {
+  const lng = ((((lon + 180) % 360) + 360) % 360) - 180;
+  const fila = Math.min(g.H - 1, Math.max(0, Math.floor(((90 - lat) / 180) * g.H)));
+  const col = Math.min(g.W - 1, Math.max(0, Math.floor(((lng + 180) / 360) * g.W)));
+  const dLat = 180 / g.H, dLon = 360 / g.W;
+  const norte = 90 - fila * dLat, oeste = -180 + col * dLon;
+  return [[norte - dLat, oeste], [norte, oeste + dLon]];
+}
+// Área que se promedia en cada sitio: 3 × 3 km alrededor del punto (02_similitud.py)
+function areaSitio(lat, lon, km = 3) {
+  const dLat = km / 2 / 111.32, dLon = km / 2 / (111.32 * Math.cos((lat * Math.PI) / 180));
+  return [[lat - dLat, lon - dLon], [lat + dLat, lon + dLon]];
+}
 function claseEnPunto(g, lat, lon) {
   const lng = ((((lon + 180) % 360) + 360) % 360) - 180;
   const fila = Math.min(g.H - 1, Math.max(0, Math.floor(((90 - lat) / 180) * g.H)));
@@ -199,9 +214,9 @@ const VALORES_REF_DOCUMENTADOS = {
 const NOVEDAD_NOMBRE = tabla({ 'Alta Guajira': 'Candidato (citado en literatura)' });
 const novedadDe = (s) => NOVEDAD[s.zona] || NOVEDAD[s.zonaOrig] || NOVEDAD_NOMBRE[s.nombre];
 const NOVEDAD = tabla({
-  cocuy: 'Nuevo (provisional)',
-  bayuda: 'Nuevo (provisional)',
-  khaybar: 'Nuevo como estudio',
+  cocuy: 'Candidato a revisar',            // sin estudios lunares/marcianos publicados; sale Luna solo por pendiente
+  bayuda: 'Rechazado por el modelo',       // 61,6 % fuera de rango: albedo 0,29, más claro que Marte (novedad-bayuda-khaybar.md)
+  khaybar: 'Candidato (sin estudio previo)', // 35,7 % Marte; no hay estudio que lo trate como análogo
   undara: 'Sin verificar',
 });
 
@@ -477,7 +492,8 @@ export default function App() {
             <div className="explore-heading">
               <span>{t('ANÁLOGOS TERRESTRES / {n} SITIOS', { n: sitios.length })}</span>
               <h1>{t('Encuentra un pedazo de Marte o de la Luna en la Tierra.')}</h1>
-              <p><b>1</b> {t('Elige Marte o Luna')} <i /> <b>2</b> {t('Elige un sitio')} <i /> <b>3</b> {t('Compara')}</p>
+              <p><b>1</b> {t('Elige Marte o Luna')} <i /> <b>2</b> {t('Elige un sitio')} <i /> <b>3</b> {t('Compara')}
+                {cuerpo === 'tierra' && LANG === 'es' && <span className="hint-inline">ARRASTRA PARA GIRAR · RUEDA PARA ACERCAR</span>}</p>
             </div>
             <div className="segmented body-switch" role="tablist" aria-label="Cuerpo del globo">
               {Object.entries(CUERPOS).map(([k, c]) => (
@@ -785,7 +801,7 @@ function Weights({ variables, pesos, setPesos, propositos, proposito, cambiarPro
   return (
     <GlassCard className="weights">
       <div className="card-heading">
-        <div><small>{t('MODELO ACTIVO')}</small><h2>{t('Pesos por variable')}</h2></div>
+        <div><small>{t('ÍNDICE DE SIMILITUD')}</small><h2>{t('Pesos del índice')}</h2></div>
         <span title={t('El índice divide por la suma de pesos: solo importa la proporción entre ellos')}>{suma === 100 ? 'Σ 100%' : t('PESOS RELATIVOS')}</span>
       </div>
       <div className="segmented purpose-switch">
@@ -806,6 +822,7 @@ function Weights({ variables, pesos, setPesos, propositos, proposito, cambiarPro
           </label>
         );
       })}
+      <p className="weights-note">{t('Ajustan el puntaje 0–100. El modelo entrenado usa solo pendiente y albedo.')}</p>
       <button className="reset" onClick={restablecer}><Icon name="reset" size={15} /> {t('Restablecer')}</button>
     </GlassCard>
   );
@@ -822,7 +839,7 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
   const elegirPunto = (lat, lon) => {
     setPunto({ lat, lon, estado: 'cargando' });
     cargarGrilla()
-      .then((g) => setPunto({ lat, lon, estado: 'ok', codigo: claseEnPunto(g, lat, lon), km: Math.round((360 / g.W) * 111) }))
+      .then((g) => setPunto({ lat, lon, estado: 'ok', codigo: claseEnPunto(g, lat, lon), km: Math.round((360 / g.W) * 111), celda: celdaEnPunto(g, lat, lon) }))
       .catch(() => setPunto({ lat, lon, estado: 'error' }));
   };
   const des = sel.desglose?.[`${refKey}|${proposito}`] || {};
@@ -900,10 +917,21 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
             <span className="image-meta">{t('TOCA EL MAPA PARA CONSULTAR CUALQUIER PUNTO')}</span>
           </div>
           <div className="site-image">
-            <MapContainer key={sel.zona} center={[sel.lat, sel.lon]} zoom={10} minZoom={3} maxZoom={18}
+            <MapContainer key={sel.zona} center={[sel.lat, sel.lon]} zoom={12} minZoom={3} maxZoom={18}
               zoomControl={false} attributionControl={false} style={{ height: '100%', width: '100%' }}>
               <TileLayer url={ESRI} maxNativeZoom={16} maxZoom={18} />
               <ClickPunto onPick={elegirPunto} />
+              {/* Área analizada del sitio (3 × 3 km) */}
+              <Rectangle bounds={areaSitio(sel.lat, sel.lon)}
+                pathOptions={{ color: target === 'moon' ? '#8dbeee' : '#e8743b', weight: 2, fill: true, fillOpacity: 0.08, dashArray: '6 4' }}>
+                <Tooltip direction="top" sticky>{t('Área analizada: 3 × 3 km')}</Tooltip>
+              </Rectangle>
+              {punto?.celda && (
+                <Rectangle bounds={punto.celda}
+                  pathOptions={{ color: '#ffffff', weight: 1.5, fill: true, fillOpacity: 0.06, dashArray: '3 4' }}>
+                  <Tooltip direction="top" sticky>{t('Celda del modelo (~{n} km)', { n: punto.km })}</Tooltip>
+                </Rectangle>
+              )}
               {punto && (
                 <CircleMarker center={[punto.lat, punto.lon]} radius={9}
                   pathOptions={{ color: '#ffffff', weight: 2, fillColor: punto.estado === 'ok' ? COLOR[KIND_BIN[punto.codigo]] || COLOR.pending : COLOR.pending, fillOpacity: 0.9 }} />

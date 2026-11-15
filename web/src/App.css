@@ -1959,3 +1959,12 @@ small, .image-meta, .eyebrow, .site-caption p, .metric-value small, .metric-head
   html[lang="es"] .globe-hint { display: none; }
 }
 /* v7.9 */
+
+/* ===================== v8.0 ===================== */
+.explore-heading p .hint-inline {
+  margin-left: 18px; color: #93a3b7; font: 11px 'IBM Plex Mono', monospace; letter-spacing: 0.12em; white-space: nowrap;
+}
+@media (max-width: 800px) { .explore-heading p .hint-inline { display: none; } }
+.weights-note { margin: 4px 0 10px; color: #a9b8c9; font-size: 12.5px; line-height: 1.4; }
+.site-image .leaflet-tooltip { font: 12px 'Space Grotesk', sans-serif; }
+@media (min-width: 801px) { .explore-heading p { white-space: nowrap; flex-wrap: nowrap; } .explore-heading p .hint-inline { margin-left: 14px; font-size: 10.5px; } }
