@@ -148,7 +148,7 @@ export default function App() {
           : Object.keys(data.referencias || {});
         const props = Object.keys(data.pesos || {});
 
-        if (refs.length > 0) setReferencia(refs[0]);
+        if (refs.length > 0) setReferencia(refs.includes('arcadia') ? 'arcadia' : refs[0]);
         if (props.length > 0) {
           const propInicial = props[0];
           setProposito(propInicial);
@@ -317,9 +317,14 @@ export default function App() {
    * @param {number | null | undefined} viajeMin
    * @returns {string}
    */
-  const formatearViaje = (viajeMin) => {
-    if (viajeMin === null || viajeMin === undefined) return "SIN DATO";
-    return `${(viajeMin / 60).toFixed(1)} h`;
+  const SIN_CARRETERA = ['devon', 'mcmurdo'];
+  const formatearViaje = (viajeMin, zona) => {
+    const nota = SIN_CARRETERA.includes(zona) ? ' (sin acceso por carretera)' : '';
+    if (viajeMin === null || viajeMin === undefined) return `SIN DATO${nota}`;
+    const texto = viajeMin > 2880
+      ? `${(viajeMin / 1440).toFixed(1)} días`
+      : `${(viajeMin / 60).toFixed(1)} h`;
+    return texto + nota;
   };
 
   /**
@@ -359,7 +364,7 @@ export default function App() {
             Pendiente de procesar
           </div>
           <p style={{ margin: '4px 0', fontSize: 13 }}>
-            <strong>Viaje:</strong> {formatearViaje(seleccionado.viaje_min)}
+            <strong>Viaje:</strong> {formatearViaje(seleccionado.viaje_min, seleccionado.zona)}
           </p>
         </div>
       );
@@ -385,7 +390,7 @@ export default function App() {
             No evaluado: superficie húmeda
           </div>
           <p style={{ margin: '4px 0', fontSize: 13 }}>
-            <strong>Viaje:</strong> {formatearViaje(seleccionado.viaje_min)}
+            <strong>Viaje:</strong> {formatearViaje(seleccionado.viaje_min, seleccionado.zona)}
           </p>
         </div>
       );
@@ -399,6 +404,11 @@ export default function App() {
     const colorClase = COLORES_CLASE[clase] || COLORES_CLASE["No coincide"];
     const conf = seleccionado.confianza?.[keyRefProp];
     const enComparador = comparados.includes(seleccionado.zona);
+    const colorRef = REFS_META[referencia]?.cuerpo === 'Luna' ? COLORES_CLASE.Luna : COLORES_CLASE.Marte;
+    const indicesPorRef = opcionesReferencia.map((rk) => ({
+      cuerpo: REFS_META[rk]?.cuerpo || rk,
+      valor: calcularIndice(seleccionado.desglose?.[`${rk}|${proposito}`]),
+    }));
 
     return (
       <div style={{ background: '#1f2937', padding: 14, borderRadius: 8, marginBottom: 16 }}>
@@ -414,8 +424,13 @@ export default function App() {
 
         {/* Puntuación global y etiqueta de clase planetaria */}
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', margin: '8px 0' }}>
-          <div style={{ fontSize: 34, fontWeight: 'bold', color: colorClase }}>
-            {score !== null ? score.toFixed(1) : '—'} <span style={{ fontSize: 14, color: '#9ca3af' }}>/ 100</span>
+          <div>
+            <div style={{ fontSize: 34, fontWeight: 'bold', color: colorRef, lineHeight: 1 }}>
+              {score !== null ? score.toFixed(1) : '—'} <span style={{ fontSize: 14, color: '#9ca3af' }}>/ 100</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>
+              vs. {REFS_META[referencia]?.etiqueta || referencia}
+            </div>
           </div>
           <div style={{
             fontSize: 18, fontWeight: 'bold', padding: '4px 10px', borderRadius: 6,
@@ -424,6 +439,16 @@ export default function App() {
             {clase}
           </div>
         </div>
+        <p style={{ margin: '0 0 10px 0', fontSize: 12, color: '#9ca3af', textAlign: 'right' }}>
+          {indicesPorRef.map((r, i) => (
+            <span key={r.cuerpo}>
+              {i > 0 && ' · '}
+              <span style={{ color: COLORES_CLASE[r.cuerpo] || '#9ca3af', fontWeight: 'bold' }}>{r.cuerpo}</span>{' '}
+              {r.valor !== null ? r.valor.toFixed(1) : 'SIN DATO'}
+            </span>
+          ))}
+          {' '}· clase si ≥ {umbralClase}
+        </p>
 
         {/* Bloque condicional del modelo de clasificación ML */}
         {modeloPresentable && seleccionado.modelo && (
@@ -463,7 +488,7 @@ export default function App() {
           </p>
         )}
         <p style={{ margin: '4px 0 10px 0', fontSize: 13 }}>
-          <strong>Viaje:</strong> {formatearViaje(seleccionado.viaje_min)}
+          <strong>Viaje:</strong> {formatearViaje(seleccionado.viaje_min, seleccionado.zona)}
         </p>
 
         <hr style={{ borderColor: '#374151' }} />
@@ -679,7 +704,7 @@ export default function App() {
                     <td style={{ padding: 4 }}>Viaje</td>
                     {sitiosComparados.map((s) => (
                       <td key={s.zona} style={{ textAlign: 'center', padding: 4 }}>
-                        {formatearViaje(s.viaje_min)}
+                        {formatearViaje(s.viaje_min, s.zona)}
                       </td>
                     ))}
                   </tr>
@@ -719,6 +744,11 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* Pie de página: créditos, fuentes y declaración de uso de IA */}
+        <footer style={{ marginTop: 20, paddingTop: 12, borderTop: '1px solid #374151', fontSize: 11, color: '#9ca3af', lineHeight: 1.5 }}>
+          Desarrollado con ayuda de IA (Claude y Gemini) · NASA Space Apps Challenge 2026 · Datos: NASA, ESA, USGS
+        </footer>
       </div>
     </div>
   );
