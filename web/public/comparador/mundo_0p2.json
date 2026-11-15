@@ -1,0 +1,62 @@
+{
+ "ancho": 1800,
+ "alto": 850,
+ "res_grados": 0.2,
+ "lat_norte": 85.0,
+ "lon_oeste": -180.0,
+ "orden": "banda, fila (norte→sur), columna (oeste→este); uint8",
+ "bandas": [
+  {
+   "nombre": "n_tierra",
+   "desc": "celdas de 0,1° con dato de tierra (0–4)"
+  },
+  {
+   "nombre": "n_marte",
+   "desc": "de ellas, clasificadas Marte"
+  },
+  {
+   "nombre": "n_luna",
+   "desc": "clasificadas Luna"
+  },
+  {
+   "nombre": "n_fuera",
+   "desc": "evaluadas pero fuera de rango o Ninguna"
+  },
+  {
+   "nombre": "n_no_evaluado",
+   "desc": "no pasan el filtro (húmedo, vegetación, hielo o ciudad)"
+  },
+  {
+   "nombre": "p_marte",
+   "desc": "media de p_marte en celdas evaluadas",
+   "decodificar": "(v-1)/250; 0 = sin dato"
+  },
+  {
+   "nombre": "tipicidad_marte",
+   "desc": "máximo percentil de verosimilitud frente a píxeles reales de Marte (0–100)",
+   "decodificar": "(v-1)/2.5"
+  },
+  {
+   "nombre": "tipicidad_luna",
+   "desc": "igual frente al polo sur lunar",
+   "decodificar": "(v-1)/2.5"
+  },
+  {
+   "nombre": "pendiente_deg",
+   "desc": "mediana",
+   "decodificar": "(v-1)/10 (tope 25,4°)"
+  },
+  {
+   "nombre": "albedo",
+   "desc": "mediana",
+   "decodificar": "(v-1)/500"
+  },
+  {
+   "nombre": "rugosidad_m",
+   "desc": "mediana",
+   "decodificar": "exp((v-1)/34)-1"
+  }
+ ],
+ "modelo": "nova_gmm.json (el mismo de global_clases.bin); filtro: lluvia < 250 mm o ciclos ≥ 0,5; suelo desnudo ≥ 50 %; nieve/hielo < 50 %; uso humano < 20 %",
+ "fuente": "global_0p1.tif (NASADEM/GMTED, MODIS MCD43C3, GPM, MCD12C1)"
+}
