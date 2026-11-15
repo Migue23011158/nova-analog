@@ -11,6 +11,7 @@
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "globe.gl": "^2.46.2",
     "leaflet": "^1.9.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
