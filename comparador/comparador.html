@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova Analog — Comparador de regiones</title>
+<style>
+:root{--bg:#0b1220;--panel:#111a2c;--line:#22304a;--txt:#e6ebf3;--mut:#9aa7bd;--marte:#c1440e;--luna:#e5e7eb;--fuera:#6b7280;--noev:#3a3f47;--mar:#0b1f33;--acc:#f0a35e}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--line)}
+h1{font-size:17px;margin:0;letter-spacing:.2px}h1 span{color:var(--acc)}
+.sub{color:var(--mut);font-size:12.5px}
+.btn{background:#18233a;border:1px solid var(--line);color:var(--txt);border-radius:7px;padding:5px 10px;cursor:pointer;font-size:12.5px}
+.btn:hover{border-color:#3a4d73}.btn.on{background:#2a3b5e;border-color:#5b78ad}
+main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);gap:0;min-height:calc(100vh - 56px)}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+#mapwrap{position:relative;border-right:1px solid var(--line);display:flex;flex-direction:column}
+.tools{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);align-items:center}
+.tools label{color:var(--mut);font-size:12px;margin-right:2px}
+#cv{width:100%;flex:1;min-height:340px;display:block;cursor:crosshair;touch-action:none;background:var(--mar)}
+#cv.pan{cursor:grab}
+.legend{display:flex;flex-wrap:wrap;gap:12px;padding:7px 12px;font-size:12px;color:var(--mut);border-top:1px solid var(--line)}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+#hint{position:absolute;left:14px;top:58px;background:rgba(11,18,32,.82);border:1px solid var(--line);padding:6px 9px;border-radius:7px;font-size:12px;color:var(--mut);pointer-events:none}
+#tip{position:absolute;pointer-events:none;background:#0d1626;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;display:none;white-space:nowrap}
+aside{padding:14px 16px;overflow:auto;max-height:calc(100vh - 56px)}
+@media(max-width:900px){aside{max-height:none}}
+h2{font-size:15px;margin:2px 0 6px}h3{font-size:13px;margin:16px 0 6px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.bar{display:flex;height:16px;border-radius:4px;overflow:hidden;border:1px solid var(--line);margin:6px 0}
+.bar div{height:100%}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px}
+.kpi b{display:block;font-size:20px}.kpi small{color:var(--mut);font-size:11.5px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:5px 4px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600}
+td.reg{color:var(--acc);font-weight:600}
+.ok{color:#7fd18b}.no{color:#e08080}
+.hist{display:grid;grid-template-columns:1fr;gap:10px}
+.hist svg{width:100%;height:96px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.note{color:var(--mut);font-size:12px;border-left:3px solid var(--line);padding-left:9px;margin:8px 0}
+.verd{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin:8px 0}
+ol{padding-left:18px;margin:4px 0}li{margin:2px 0}
+.empty{color:var(--mut);padding:30px 6px}
+a{color:#8fb5ff}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Nova Analog — <span data-t="titulo">Comparador de regiones</span></h1>
+  <div class="sub" data-t="subt">Selecciona cualquier parte de la Tierra y compárala con Marte (Arcadia) y la Luna (Shackleton).</div></div>
+  <div><button class="btn" id="lang">English</button></div>
+</header>
+<main>
+<section id="mapwrap">
+  <div class="tools">
+    <button class="btn on" id="mSel" data-t="selec">✚ Seleccionar</button>
+    <button class="btn" id="mPan" data-t="mover">✋ Mover</button>
+    <button class="btn" id="zin">＋</button><button class="btn" id="zout">－</button><button class="btn" id="zreset" data-t="mundo">Mundo</button>
+    <button class="btn on" id="filBtn"></button><button class="btn on" id="c1kBtn"></button>
+    <label data-t="ir">Ir a:</label>
+    <select class="btn" id="preset"></select>
+  </div>
+  <canvas id="cv"></canvas>
+  <div id="hint" data-t="hint">Arrastra para seleccionar una región · clic para ver un punto · rueda para acercar</div>
+  <div id="tip"></div>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--marte)"></i><span data-t="lgM">Parecido a Marte</span></span>
+    <span><i class="sw" style="background:var(--luna)"></i><span data-t="lgL">Parecido a la Luna</span></span>
+    <span><i class="sw" style="background:var(--fuera)"></i><span data-t="lgF">Evaluado, no se parece</span></span>
+    <span><i class="sw" style="background:var(--noev)"></i><span data-t="lgX">No evaluado (húmedo, vegetación, hielo o ciudad)</span></span>
+  </div>
+</section>
+<aside id="panel"><div class="empty" data-t="cargando">Cargando datos…</div></aside>
+</main>
+<script>
+const REF = {"arcadia":{"nombre":"Arcadia Planitia (Marte)","pendiente_deg":[0.1265,0.1689,0.245,0.404,0.699],"albedo":[0.1824,0.2048,0.2333,0.2405,0.2445],"rugosidad_m":[3.1146,4.3004,6.4525,11.3409,20.3745]},"shackleton":{"nombre":"Borde de Shackleton (Luna)","pendiente_deg":[3.525,5.7203,8.77,12.5712,16.0674],"albedo":[0.1737,0.1768,0.1802,0.1845,0.1881],"rugosidad_m":[162.3253,252.5171,367.2363,499.1687,604.1722]},"marte_franja":{"nombre":"Marte 30–60°N (entrenamiento)","pendiente_deg":[0.209,0.3231,0.5267,1.0316,2.4762],"albedo":[0.1304,0.1589,0.2252,0.2507,0.2721],"rugosidad_m":[5.9605,9.2143,16.1568,35.7886,88.7726]},"luna_polo":{"nombre":"Polo sur lunar 80–90°S (entrenamiento)","pendiente_deg":[3.0867,4.876,8.0028,12.5562,17.596],"albedo":[0.1464,0.1513,0.157,0.1638,0.1716],"rugosidad_m":[113.0835,186.3733,305.4575,483.2322,679.4467]},"bins":{"pendiente_deg":[0.0,0.25,0.5,1.0,1.5,2.0,3.0,4.0,6.0,8.0,10.0,15.0,20.0,30.0,90.0],"albedo":[0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,0.24,0.26,0.28,0.3,0.32,0.34,0.36,0.38,0.4,0.42,0.44],"rugosidad_m":[0.0,5.0,10.0,20.0,40.0,80.0,160.0,320.0,640.0,5000.0]},"hist":{"marte":{"pendiente_deg":[0.1478,0.3261,0.2677,0.0891,0.0434,0.045,0.0249,0.0266,0.0136,0.0086,0.0064,0.0007,0.0,0.0],"albedo":[0.0,0.0,0.0067,0.0522,0.0888,0.111,0.075,0.0578,0.0794,0.1536,0.2084,0.1099,0.0516,0.0057,0.0,0.0,0.0,0.0,0.0,0.0],"rugosidad_m":[0.0662,0.22,0.2956,0.1929,0.1136,0.062,0.0357,0.0135,0.0005]},"luna":{"pendiente_deg":[0.0,0.0,0.0003,0.0073,0.0202,0.0654,0.0793,0.1734,0.1539,0.1261,0.2109,0.1024,0.06,0.0008],"albedo":[0.0,0.0,0.0,0.0,0.0191,0.6048,0.3457,0.0296,0.0008,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"rugosidad_m":[0.0,0.0003,0.0049,0.0121,0.0344,0.1381,0.3353,0.3527,0.1222]}}};
+const W=1800,H=850,RES=0.2,LAT0=85,LON0=-180;
+const BASE_M=32.3, BASE_L=4.5; // % del terreno evaluado del mundo clasificado Marte / Luna (178.028 celdas de 0,1°)
+const NB=["n_tierra","n_marte","n_luna","n_fuera","n_no_evaluado","p_marte","tip_marte","tip_luna","pendiente","albedo","rugosidad","n_marte_sf","n_luna_sf","n_fuera_sf"];
+const D={};let FILTRO=true;
+const PRESETS=[
+ ["—",null],["Colombia (1 km)",[-4.3,-79.2,12.6,-66.8]],["Alta Guajira (1 km)",[11.0,-73.0,12.6,-71.0]],["Desierto de la Tatacoa (1 km)",[3.1,-75.3,3.5,-75.0]],["Sierra Nevada / Cocuy (1 km)",[6.2,-72.5,6.7,-72.1]],
+ ["Atacama (Chile)",[-27,-71,-21,-68]],["Death Valley / Mojave (EE. UU.)",[34,-118,37.5,-114.5]],
+ ["Cuenca de Qaidam (China)",[35.5,89,39.5,98]],["Desierto de Lut (Irán)",[28.5,57,32.5,60.5]],
+ ["Namib (Namibia)",[-26,14,-21,16.5]],["Puna de Atacama",[-28,-69.5,-23,-66]],["Sahara central",[18,-2,28,12]],
+ ["Arabia central",[20,40,27,48]],["Islandia",[63.3,-24.5,66.6,-13.5]]];
+const T={es:{titulo:"Comparador de regiones",subt:"Selecciona cualquier parte de la Tierra y compárala con Marte (Arcadia) y la Luna (Shackleton).",selec:"✚ Seleccionar",mover:"✋ Mover",mundo:"Mundo",ir:"Ir a:",
+ hint:"Arrastra para seleccionar una región · clic para ver un punto · rueda para acercar",lgM:"Parecido a Marte",lgL:"Parecido a la Luna",lgF:"Evaluado, no se parece",lgX:"No evaluado (húmedo, vegetación, hielo o ciudad)",cargando:"Cargando datos…",
+ vacio:"Arrastra un rectángulo sobre el mapa (o elige un lugar en “Ir a”) para comparar esa región con Marte y la Luna.",region:"Región seleccionada",punto:"Punto",tierra:"celdas de tierra",area:"km² de tierra",eval:"evaluado",
+ compo:"Qué dice el modelo",marte:"Marte",luna:"Luna",fuera:"No se parece",noev:"No evaluado",delEval:"del terreno evaluado",
+ vsMundo:"El mundo: {b} %. Esta región: {r} % → {x}× la tasa mundial.",nada:"Nada del terreno pasa el filtro (húmedo, con vegetación, hielo o ciudad): el modelo no la evalúa.",
+ comp:"Comparación de variables (mediana del terreno evaluado)",var:"Variable",reg:"Región",pend:"Pendiente (°)",alb:"Albedo",rug:"Rugosidad (m)",dentro:"¿Dentro del rango típico (p10–p90)?",
+ hist:"Distribución: región frente a Marte y la Luna",top:"Celdas más parecidas a Marte",tipM:"tipicidad Marte",sinM:"Ninguna celda de la región sale Marte.",
+ notas:"Cómo leerlo",n1:"Clasificación: modelo GMM de Nova Analog (pendiente + albedo), el mismo de la página. Rejilla de 0,2° (~22 km) agregada desde celdas de 0,1°.",
+ n2:"“Tipicidad Marte 90” = la celda es al menos tan típica de Marte como el 90 % de los píxeles reales de Marte con que se entrenó. No es una probabilidad.",
+ n3:"La rugosidad se muestra para comparar; el modelo no la usa.",n4:"El modelo mide forma del terreno y brillo de la superficie. No ve hielo, temperatura, composición ni radiación.",
+ n5:"Referencias: Arcadia = 300 km alrededor de 47,2°N 184,3°E (MOLA, TES). Shackleton = 30 km alrededor del cráter (LOLA). Marte y Luna = píxeles de entrenamiento (30–60°N; 80–90°S).",
+ copiar:"Copiar resumen",copiado:"Copiado",cel:"celdas",filSi:"Filtro: activado",filNo:"Filtro: desactivado",c1kSi:"Detalle 1 km: visible",c1kNo:"Detalle 1 km: oculto",sfMundo:"Filtro desactivado: todo el terreno se clasifica solo por pendiente y albedo, incluidas selvas, cultivos, nieve y ciudades. Muestra lo que ve el modelo; no es un resultado de análogos.",polar:"Sin datos de NDVI ni aridez en esta zona polar: se evalúa todo (roca y hielo).",coF:"Colombia 1 km: con filtro",coS:"Colombia 1 km: sin filtro",coO:"Colombia 1 km: oculto",coT:"a 1 km (detalle)",coSub:"píxeles de ~1 km",coEval:"pasan el filtro",coMot:"Por qué no se evalúa",coVH:"vegetación y húmedo",coV:"solo vegetación",coH:"solo húmedo",coSinAviso:"Modo sin filtro: el modelo clasifica todo solo por pendiente y albedo, incluida selva y páramo. Sirve para ver qué ve el modelo, no como resultado: muchas celdas oscuras y empinadas de los Andes caen en “Luna” por pura forma.",coNota:"Capa 1 km: mismas variables del modelo, calculadas a ~1 km para Colombia. Filtro a 1 km: se excluye NDVI ≥ 0,25 y lo húmedo (P/PET ≥ 0,5 y lluvia ≥ 250 mm) salvo ciclos de hielo ≥ 0,5."},
+ en:{titulo:"Region comparator",subt:"Select any part of Earth and compare it with Mars (Arcadia) and the Moon (Shackleton).",selec:"✚ Select",mover:"✋ Pan",mundo:"World",ir:"Go to:",
+ hint:"Drag to select a region · click for a point · scroll to zoom",lgM:"Mars-like",lgL:"Moon-like",lgF:"Evaluated, not similar",lgX:"Not evaluated (wet, vegetated, ice or urban)",cargando:"Loading data…",
+ vacio:"Drag a rectangle on the map (or pick a place in “Go to”) to compare that region with Mars and the Moon.",region:"Selected region",punto:"Point",tierra:"land cells",area:"km² of land",eval:"evaluated",
+ compo:"What the model says",marte:"Mars",luna:"Moon",fuera:"Not similar",noev:"Not evaluated",delEval:"of evaluated terrain",
+ vsMundo:"World: {b} %. This region: {r} % → {x}× the global rate.",nada:"No terrain passes the filter (wet, vegetated, ice or urban): the model does not evaluate it.",
+ comp:"Variable comparison (median of evaluated terrain)",var:"Variable",reg:"Region",pend:"Slope (°)",alb:"Albedo",rug:"Roughness (m)",dentro:"Within the typical range (p10–p90)?",
+ hist:"Distribution: region vs. Mars and the Moon",top:"Most Mars-like cells",tipM:"Mars typicality",sinM:"No cell in this region is classified as Mars.",
+ notas:"How to read it",n1:"Classification: Nova Analog GMM (slope + albedo), the same model as the main page. 0.2° grid (~22 km) aggregated from 0.1° cells.",
+ n2:"“Mars typicality 90” = the cell is at least as typical of Mars as 90 % of the real Mars pixels used for training. Not a probability.",
+ n3:"Roughness is shown for comparison; the model does not use it.",n4:"The model measures terrain shape and surface brightness. It does not see ice, temperature, composition or radiation.",
+ n5:"References: Arcadia = 300 km around 47.2°N 184.3°E (MOLA, TES). Shackleton = 30 km around the crater (LOLA). Mars and Moon = training pixels (30–60°N; 80–90°S).",
+ copiar:"Copy summary",copiado:"Copied",cel:"cells",filSi:"Filter: on",filNo:"Filter: off",c1kSi:"1 km detail: shown",c1kNo:"1 km detail: hidden",sfMundo:"Filter off: all terrain is classified by slope and albedo only, including rainforest, cropland, snow and cities. It shows what the model sees; it is not an analog result.",polar:"No NDVI or aridity data in this polar area: everything is evaluated (rock and ice).",coF:"Colombia 1 km: filtered",coS:"Colombia 1 km: unfiltered",coO:"Colombia 1 km: hidden",coT:"at 1 km (detail)",coSub:"~1 km pixels",coEval:"pass the filter",coMot:"Why it is not evaluated",coVH:"vegetated and wet",coV:"vegetated only",coH:"wet only",coSinAviso:"Unfiltered mode: the model classifies everything by slope and albedo only, including rainforest and páramo. Use it to see what the model sees, not as a result: many dark, steep Andean cells fall into “Moon” by shape alone.",coNota:"1 km layer: same model variables, computed at ~1 km for Colombia. 1 km filter: excludes NDVI ≥ 0.25 and wet terrain (P/PET ≥ 0.5 and rain ≥ 250 mm) unless freeze cycles ≥ 0.5."}};
+let L="es"; const t=k=>T[L][k]||k;
+function aplicarIdioma(){document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));document.getElementById("lang").textContent=L==="es"?"English":"Español";document.documentElement.lang=L;etiquetasBtn();render();}
+document.getElementById("lang").onclick=()=>{L=L==="es"?"en":"es";aplicarIdioma();};
+const fmt=(x,d=1)=>x==null||!isFinite(x)?"—":(L==="es"?x.toLocaleString("es-CO",{minimumFractionDigits:d,maximumFractionDigits:d}):x.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d}));
+const dec={p_marte:v=>v?(v-1)/250:null,tip_marte:v=>v?(v-1)/2.5:null,tip_luna:v=>v?(v-1)/2.5:null,pendiente:v=>v?(v-1)/10:null,albedo:v=>v?(v-1)/500:null,rugosidad:v=>v?Math.exp((v-1)/34)-1:null};
+
+async function cargar(){
+  await Promise.all(NB.map(n=>new Promise((ok,ko)=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(im,0,0);const px=x.getImageData(0,0,W,H).data;const a=new Uint8Array(W*H);for(let i=0;i<W*H;i++)a[i]=px[i*4];D[n]=a;ok();};im.onerror=ko;im.src="datos/"+n+".png";})));
+  await cargarCapas(); construirBase(); construirCapas(); poblarPresets(); aplicarIdioma(); ajustar();
+}
+// ---------- mapa base
+let base,BASES={}; function construirBase(){for(const f of [true,false]){const nm=f?D.n_marte:D.n_marte_sf,nl=f?D.n_luna:D.n_luna_sf,nf=f?D.n_fuera:D.n_fuera_sf;
+  base=document.createElement("canvas");base.width=W;base.height=H;const x=base.getContext("2d");const im=x.createImageData(W,H);const p=im.data;
+  const col={mar:[11,31,51],noev:[58,63,71],fuera:[107,114,128],marte:[193,68,14],luna:[229,231,235]};
+  for(let i=0;i<W*H;i++){const n=D.n_tierra[i];let c;if(!n)c=col.mar;else{const m=nm[i],l=nl[i],f=nf[i];const ev=m+l+f;
+    if(!ev)c=col.noev;else if(m>=l&&m>=f&&m>0)c=col.marte;else if(l>=f&&l>0)c=col.luna;else c=col.fuera;}
+    p[i*4]=c[0];p[i*4+1]=c[1];p[i*4+2]=c[2];p[i*4+3]=255;}
+  x.putImageData(im,0,0);BASES[f]=base;}base=BASES[true];
+}
+// ---------- vista
+const cv=document.getElementById("cv"),ctx=cv.getContext("2d");let vw={s:1,x:0,y:0};let modo="sel";let sel=null,drag=null;
+function ajustar(){const r=cv.getBoundingClientRect();const dpr=window.devicePixelRatio||1;cv.width=Math.round(r.width*dpr);cv.height=Math.round(Math.max(340,r.height)*dpr);if(vw.s===1&&vw.x===0)reset();else draw();}
+function reset(){const s=Math.min(cv.width/W,cv.height/H);vw={s,x:(cv.width-W*s)/2,y:(cv.height-H*s)/2};draw();}
+window.addEventListener("resize",ajustar);
+function aPant(c,r){return[c*vw.s+vw.x,r*vw.s+vw.y];}
+function aDato(px,py){return[(px-vw.x)/vw.s,(py-vw.y)/vw.s];}
+function draw(){ctx.fillStyle="#0b1f33";ctx.fillRect(0,0,cv.width,cv.height);if(!base)return;ctx.imageSmoothingEnabled=vw.s<1.5;ctx.drawImage(base,vw.x,vw.y,W*vw.s,H*vw.s);dibujarCapas();
+  // retícula
+  ctx.strokeStyle="rgba(255,255,255,.07)";ctx.lineWidth=1;for(let lo=-180;lo<=180;lo+=30){const[x]=aPant((lo-LON0)/RES,0);ctx.beginPath();ctx.moveTo(x,vw.y);ctx.lineTo(x,vw.y+H*vw.s);ctx.stroke();}
+  for(let la=-60;la<=80;la+=30){const[,y]=aPant(0,(LAT0-la)/RES);ctx.beginPath();ctx.moveTo(vw.x,y);ctx.lineTo(vw.x+W*vw.s,y);ctx.stroke();}
+  const R=drag&&drag.sel?drag.sel:sel;if(R){const[x1,y1]=aPant(R.c0,R.r0),[x2,y2]=aPant(R.c1+1,R.r1+1);ctx.fillStyle="rgba(240,163,94,.15)";ctx.fillRect(x1,y1,x2-x1,y2-y1);ctx.strokeStyle="#f0a35e";ctx.lineWidth=2;ctx.strokeRect(x1,y1,x2-x1,y2-y1);}}
+function evPos(e){const r=cv.getBoundingClientRect();const dpr=cv.width/r.width;return[(e.clientX-r.left)*dpr,(e.clientY-r.top)*dpr];}
+const clampC=c=>Math.max(0,Math.min(W-1,Math.floor(c))),clampR=r=>Math.max(0,Math.min(H-1,Math.floor(r)));
+cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);const p=evPos(e);drag={p0:p,p1:p,v0:{...vw},mov:false,pan:modo==="pan"||e.button===1||e.button===2};});
+cv.addEventListener("pointermove",e=>{const p=evPos(e);mostrarTip(e,p);if(!drag)return;drag.p1=p;if(Math.hypot(p[0]-drag.p0[0],p[1]-drag.p0[1])>6)drag.mov=true;
+  if(drag.pan){vw.x=drag.v0.x+(p[0]-drag.p0[0]);vw.y=drag.v0.y+(p[1]-drag.p0[1]);draw();}
+  else if(drag.mov){const a=aDato(...drag.p0),b=aDato(...p);drag.sel={c0:clampC(Math.min(a[0],b[0])),c1:clampC(Math.max(a[0],b[0])),r0:clampR(Math.min(a[1],b[1])),r1:clampR(Math.max(a[1],b[1]))};draw();}});
+cv.addEventListener("pointerup",e=>{if(!drag)return;if(!drag.pan){if(drag.mov&&drag.sel){sel=drag.sel;}else{const[c,r]=aDato(...evPos(e));if(c>=0&&r>=0&&c<W&&r<H)sel={c0:clampC(c),c1:clampC(c),r0:clampR(r),r1:clampR(r)};}
+  document.getElementById("preset").value="0";render();}drag=null;draw();});
+cv.addEventListener("contextmenu",e=>e.preventDefault());
+cv.addEventListener("wheel",e=>{e.preventDefault();zoomEn(evPos(e),e.deltaY<0?1.25:0.8);},{passive:false});
+cv.addEventListener("pointerleave",()=>{document.getElementById("tip").style.display="none";});
+function zoomEn(p,f){const s=Math.max(Math.min(cv.width/W,cv.height/H)*0.8,Math.min(40,vw.s*f));const k=s/vw.s;vw.x=p[0]-(p[0]-vw.x)*k;vw.y=p[1]-(p[1]-vw.y)*k;vw.s=s;draw();}
+document.getElementById("zin").onclick=()=>zoomEn([cv.width/2,cv.height/2],1.5);
+document.getElementById("zout").onclick=()=>zoomEn([cv.width/2,cv.height/2],1/1.5);
+document.getElementById("zreset").onclick=reset;
+const bSel=document.getElementById("mSel"),bPan=document.getElementById("mPan");
+bSel.onclick=()=>{modo="sel";bSel.classList.add("on");bPan.classList.remove("on");cv.classList.remove("pan");};
+bPan.onclick=()=>{modo="pan";bPan.classList.add("on");bSel.classList.remove("on");cv.classList.add("pan");};
+function latLon(c,r){return[LAT0-(r+.5)*RES,LON0+(c+.5)*RES];}
+function mostrarTip(e,p){const tip=document.getElementById("tip");const[c,r]=aDato(...p);if(c<0||r<0||c>=W||r>=H){tip.style.display="none";return;}
+  const i=Math.floor(r)*W+Math.floor(c);const[la,lo]=latLon(Math.floor(c),Math.floor(r));const n=D.n_tierra?D.n_tierra[i]:0;
+  let s=fmt(la,1)+"°, "+fmt(lo,1)+"°";if(n){const M_=FILTRO?D.n_marte[i]:D.n_marte_sf[i],L_=FILTRO?D.n_luna[i]:D.n_luna_sf[i],F_=FILTRO?D.n_fuera[i]:D.n_fuera_sf[i];const ev=M_+L_+F_;s+=" · "+(ev?(M_>=L_&&M_>=F_&&M_?t("marte"):L_>=F_&&L_?t("luna"):t("fuera")):t("noev"));}
+  const r0=cv.getBoundingClientRect(),w=document.getElementById("mapwrap").getBoundingClientRect();tip.textContent=s;tip.style.display="block";tip.style.left=(e.clientX-w.left+14)+"px";tip.style.top=(e.clientY-w.top+14)+"px";}
+function poblarPresets(){const s=document.getElementById("preset");s.innerHTML=PRESETS.map((p,i)=>'<option value="'+i+'">'+p[0]+'</option>').join("");
+  s.onchange=()=>{const p=PRESETS[+s.value][1];if(!p)return;const[la0,lo0,la1,lo1]=p;sel={c0:clampC((lo0-LON0)/RES),c1:clampC((lo1-LON0)/RES-1e-6),r0:clampR((LAT0-la1)/RES),r1:clampR((LAT0-la0)/RES-1e-6)};
+   const cx=(sel.c0+sel.c1)/2,cy=(sel.r0+sel.r1)/2,ext=Math.max(sel.c1-sel.c0,(sel.r1-sel.r0)*2,20);const sc=Math.min(40,Math.min(cv.width,cv.height*2)/(ext*2.2));vw.s=sc;vw.x=cv.width/2-cx*sc;vw.y=cv.height/2-cy*sc;draw();render();};}
+// ---------- estadística
+function pct(a,q){if(!a.length)return null;const b=Float64Array.from(a).sort();const k=(b.length-1)*q,f=Math.floor(k),c=Math.ceil(k);return b[f]+(b[c]-b[f])*(k-f);}
+function calcular(R){let nT=0,nM=0,nL=0,nF=0,nX=0,area=0;const V={pend:[],alb:[],rug:[]};const cand=[];
+  for(let r=R.r0;r<=R.r1;r++){const la=LAT0-(r+.5)*RES,ka=11.1*11.1*Math.cos(la*Math.PI/180);for(let c=R.c0;c<=R.c1;c++){const i=r*W+c,n=D.n_tierra[i];if(!n)continue;
+    const cm=FILTRO?D.n_marte[i]:D.n_marte_sf[i],cl=FILTRO?D.n_luna[i]:D.n_luna_sf[i],cf=FILTRO?D.n_fuera[i]:D.n_fuera_sf[i];
+    nT+=n;nM+=cm;nL+=cl;nF+=cf;nX+=FILTRO?D.n_no_evaluado[i]:0;area+=n*ka;
+    if(cm+cl+cf>0){const p=dec.pendiente(D.pendiente[i]),a=dec.albedo(D.albedo[i]),g=dec.rugosidad(D.rugosidad[i]);if(p!=null)V.pend.push(p);if(a!=null)V.alb.push(a);if(g!=null)V.rug.push(g);
+      if(cm>0)cand.push({c,r,tip:dec.tip_marte(D.tip_marte[i]),p,a,frac:cm/n});}}}
+  cand.sort((x,y)=>(y.tip||0)-(x.tip||0));return{nT,nM,nL,nF,nX,area,V,cand:cand.slice(0,6)};}
+const KEYV={pend:"pendiente_deg",alb:"albedo",rug:"rugosidad_m"};const DIG={pend:2,alb:3,rug:0};
+function enRango(x,ref){return x!=null&&x>=ref[0]&&x<=ref[4];}
+function histSVG(key,vals){const b=REF.bins[KEYV[key]],nb=b.length-1;const cnt=new Array(nb).fill(0);for(const v of vals){let k=nb-1;for(let j=0;j<nb;j++)if(v<b[j+1]){k=j;break;}cnt[k]++;}
+  const reg=vals.length?cnt.map(x=>x/vals.length):cnt;const M=REF.hist.marte[KEYV[key]],Lh=REF.hist.luna[KEYV[key]];const mx=Math.max(...reg,...M,...Lh,0.01);
+  const w=100/nb;let s='<svg viewBox="0 0 100 40" preserveAspectRatio="none">';
+  reg.forEach((v,j)=>{const h=34*v/mx;s+='<rect x="'+(j*w+0.6)+'" y="'+(36-h)+'" width="'+(w-1.2)+'" height="'+h+'" fill="#f0a35e" opacity=".75"/>';});
+  const line=(A,col)=>'<polyline fill="none" stroke="'+col+'" stroke-width="0.6" vector-effect="non-scaling-stroke" style="stroke-width:2px" points="'+A.map((v,j)=>(j*w+w/2)+","+(36-34*v/mx)).join(" ")+'"/>';
+  s+=line(M,"#c1440e")+line(Lh,"#e5e7eb");s+='</svg>';
+  const etq=key==="alb"?b.filter((_,j)=>j%5===0).map(x=>fmt(x,2)):b.slice(0,-1).filter((_,j)=>j%3===0).map(x=>fmt(x,key==="pend"?(x<1?2:0):0));
+  return '<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px"><b>'+t(key)+'</b><span style="color:var(--mut)"><i class="sw" style="background:#f0a35e"></i>'+t("reg")+' <i class="sw" style="background:#c1440e"></i>'+t("marte")+' <i class="sw" style="background:#e5e7eb"></i>'+t("luna")+'</span></div>'+s+'<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut)">'+etq.map(x=>'<span>'+x+'</span>').join("")+'</div></div>';}
+let ultimo="";
+function render(){const P=document.getElementById("panel");if(!D.n_tierra)return;if(!sel){P.innerHTML='<div class="empty">'+t("vacio")+'</div>';return;}
+  const R=sel,S=calcular(R);const[la1,lo0]=latLon(R.c0,R.r0),[la0,lo1]=latLon(R.c1,R.r1);const unico=R.c0===R.c1&&R.r0===R.r1;
+  const titulo=(unico?t("punto"):t("region"))+": "+(unico?fmt(la1,1)+"°, "+fmt(lo0,1)+"°":fmt(la0-RES/2,1)+"° … "+fmt(la1+RES/2,1)+"° / "+fmt(lo0-RES/2,1)+"° … "+fmt(lo1+RES/2,1)+"°");
+  let h='<h2>'+titulo+'</h2>';
+  if(!S.nT){P.innerHTML=h+'<div class="empty">'+(L==="es"?"Sin tierra en la selección.":"No land in the selection.")+'</div>';return;}
+  const ev=S.nM+S.nL+S.nF;const pM=ev?100*S.nM/ev:0,pL=ev?100*S.nL/ev:0;
+  h+='<div class="sub">'+fmt(S.nT,0)+' '+t("tierra")+' (0,1°) · ~'+fmt(S.area,0)+' '+t("area")+' · '+fmt(100*ev/S.nT,0)+' % '+t("eval")+'</div>';
+  h+='<h3>'+t("compo")+'</h3><div class="bar">'+[[S.nM,"--marte"],[S.nL,"--luna"],[S.nF,"--fuera"],[S.nX,"--noev"]].map(([v,c])=>'<div style="width:'+(100*v/S.nT)+'%;background:var('+c+')"></div>').join("")+'</div>';
+  h+='<div class="kpis"><div class="kpi"><b style="color:var(--marte)">'+fmt(pM,0)+' %</b><small>'+t("marte")+' · '+t("delEval")+'</small></div><div class="kpi"><b>'+fmt(pL,0)+' %</b><small>'+t("luna")+' · '+t("delEval")+'</small></div><div class="kpi"><b style="color:var(--mut)">'+fmt(100*S.nX/S.nT,0)+' %</b><small>'+t("noev")+'</small></div></div>';
+  if(!FILTRO)h+='<div class="note" style="border-color:#e0a050">'+t("sfMundo")+'</div>';if(ev&&FILTRO){h+='<div class="verd">'+t("vsMundo").replace("{b}",fmt(BASE_M,0)).replace("{r}",fmt(pM,0)).replace("{x}",fmt(pM/BASE_M,1))+' '+(L==="es"?"(Luna: mundo "+fmt(BASE_L,1)+" %, región "+fmt(pL,1)+" %)":"(Moon: world "+fmt(BASE_L,1)+" %, region "+fmt(pL,1)+" %)")+'</div>';}
+  else if(!ev)h+='<div class="verd">'+t("nada")+(CAPAS.some(c=>c.ok&&solapa(c,R))&&C1K?(L==="es"?" A 1 km sí hay terreno evaluado: mira el detalle abajo.":" At 1 km some terrain is evaluated: see the detail below."):"")+'</div>';
+  if(ev){const med={pend:pct(S.V.pend,.5),alb:pct(S.V.alb,.5),rug:pct(S.V.rug,.5)};
+    h+='<h3>'+t("comp")+'</h3><table><tr><th>'+t("var")+'</th><th>'+t("reg")+'</th><th>Arcadia</th><th>'+(L==="es"?"Marte":"Mars")+'</th><th>Shackleton</th><th>'+(L==="es"?"Luna polo S":"Moon S pole")+'</th></tr>';
+    for(const k of ["pend","alb","rug"]){const kv=KEYV[k];const d=DIG[k];const cell=(ref)=>{const okk=enRango(med[k],ref);return fmt(ref[2],d)+' <span class="'+(okk?"ok":"no")+'">'+(okk?"✓":"✗")+'</span>';};
+      h+='<tr><td>'+t(k)+'</td><td class="reg">'+fmt(med[k],d)+'</td><td>'+cell(REF.arcadia[kv])+'</td><td>'+cell(REF.marte_franja[kv])+'</td><td>'+cell(REF.shackleton[kv])+'</td><td>'+cell(REF.luna_polo[kv])+'</td></tr>';}
+    h+='</table><div class="note">✓/✗: '+t("dentro")+' '+(L==="es"?"Columnas = mediana de cada referencia.":"Columns = median of each reference.")+'</div>';
+    h+='<h3>'+t("hist")+'</h3><div class="hist">'+histSVG("pend",S.V.pend)+histSVG("alb",S.V.alb)+histSVG("rug",S.V.rug)+'</div>';
+    h+='<h3>'+t("top")+'</h3>';
+    if(S.cand.length){h+='<table><tr><th>Lat, Lon</th><th>'+t("tipM")+'</th><th>'+t("pend")+'</th><th>'+t("alb")+'</th></tr>'+S.cand.map(x=>{const[a,b]=latLon(x.c,x.r);return'<tr><td>'+fmt(a,2)+', '+fmt(b,2)+'</td><td>'+fmt(x.tip,0)+'</td><td>'+fmt(x.p,2)+'</td><td>'+fmt(x.a,3)+'</td></tr>';}).join("")+'</table>';}
+    else h+='<div class="note">'+t("sinM")+'</div>';
+    ultimo=titulo+"\n"+(L==="es"?"Marte":"Mars")+": "+fmt(pM,0)+" % | "+(L==="es"?"Luna":"Moon")+": "+fmt(pL,0)+" % | "+(L==="es"?"mundo":"world")+" "+fmt(BASE_M,0)+" % | "+t("pend")+" "+fmt(med.pend,2)+" | "+t("alb")+" "+fmt(med.alb,3)+" | "+t("rug")+" "+fmt(med.rug,0);
+    h+='<p><button class="btn" id="copy">'+t("copiar")+'</button></p>';}
+  h+=bloquesCapas(R);h+='<h3>'+t("notas")+'</h3>'+["n1","n2","n3","n4","n5"].map(k=>'<div class="note">'+t(k)+'</div>').join("");
+  P.innerHTML=h;const cb=document.getElementById("copy");if(cb)cb.onclick=async()=>{try{await navigator.clipboard.writeText(ultimo);cb.textContent=t("copiado");}catch(e){cb.textContent="—";}};}
+
+// ---------- capas de detalle a 1 km
+let C1K=true;const CAPAS=[];const CL=["clase","clase_sin_filtro","tip_marte","tip_luna","pendiente","albedo","rugosidad","motivo"];
+async function cargarCapa(meta){const c=Object.assign({ok:false},meta);try{await Promise.all(CL.map(n=>new Promise((ok,ko)=>{const im=new Image();im.onload=()=>{const cv2=document.createElement("canvas");cv2.width=c.ancho;cv2.height=c.alto;const x=cv2.getContext("2d",{willReadFrequently:true});x.drawImage(im,0,0);const px=x.getImageData(0,0,c.ancho,c.alto).data;const a=new Uint8Array(c.ancho*c.alto);for(let i=0;i<a.length;i++)a[i]=px[i*4];c[n]=a;ok();};im.onerror=ko;im.src=c.dir+n+".png";})));c.ok=true;}catch(e){}return c;}
+async function cargarCapas(){let metas=[];try{const co=await (await fetch("datos/co/meta.json")).json();metas.push(Object.assign(co,{id:"colombia",nombre:"Colombia",dir:"datos/co/"}));}catch(e){}
+  try{metas=metas.concat(await (await fetch("datos/r1km/index.json")).json());}catch(e){}
+  const cs=await Promise.all(metas.map(cargarCapa));cs.filter(c=>c.ok).forEach(c=>CAPAS.push(c));}
+function construirCapas(){const col={1:[193,68,14],2:[229,231,235],3:[107,114,128],4:[58,63,71]};
+  for(const c of CAPAS)for(const k of ["clase","clase_sin_filtro"]){const e=document.createElement("canvas");e.width=c.ancho;e.height=c.alto;const x=e.getContext("2d");const im=x.createImageData(c.ancho,c.alto);const p=im.data;const a=c[k];
+    for(let i=0;i<a.length;i++){const q=col[a[i]];if(q){p[i*4]=q[0];p[i*4+1]=q[1];p[i*4+2]=q[2];p[i*4+3]=255;}}x.putImageData(im,0,0);c["img_"+k]=e;}
+  const bf=document.getElementById("filBtn"),bc=document.getElementById("c1kBtn");
+  bf.onclick=()=>{FILTRO=!FILTRO;base=BASES[FILTRO];etiquetasBtn();draw();render();};
+  bc.onclick=()=>{C1K=!C1K;etiquetasBtn();draw();render();};if(!CAPAS.length)bc.style.display="none";etiquetasBtn();
+  // presets de las capas
+  for(const c of CAPAS){if(c.id==="colombia")continue;PRESETS.push([c.nombre+" (1 km)",[c.lat_norte-c.alto*c.res,c.lon_oeste,c.lat_norte,c.lon_oeste+c.ancho*c.res]]);}}
+function etiquetasBtn(){const bf=document.getElementById("filBtn"),bc=document.getElementById("c1kBtn");if(!bf)return;bf.textContent=t(FILTRO?"filSi":"filNo");bf.classList.toggle("on",FILTRO);bc.textContent=t(C1K?"c1kSi":"c1kNo");bc.classList.toggle("on",C1K);}
+function dibujarCapas(){if(!C1K)return;const k0=FILTRO?"img_clase":"img_clase_sin_filtro";ctx.imageSmoothingEnabled=false;
+  for(const c of CAPAS){const k=c.res/RES;const x=vw.x+((c.lon_oeste-LON0)/RES)*vw.s,y=vw.y+((LAT0-c.lat_norte)/RES)*vw.s;ctx.drawImage(c[k0],x,y,c.ancho*k*vw.s,c.alto*k*vw.s);}}
+function rangoCapa(c,R){const latN=LAT0-R.r0*RES,latS=LAT0-(R.r1+1)*RES,lonW=LON0+R.c0*RES,lonE=LON0+(R.c1+1)*RES;
+  return{r0:Math.max(0,Math.floor((c.lat_norte-latN)/c.res)),r1:Math.min(c.alto-1,Math.ceil((c.lat_norte-latS)/c.res)-1),c0:Math.max(0,Math.floor((lonW-c.lon_oeste)/c.res)),c1:Math.min(c.ancho-1,Math.ceil((lonE-c.lon_oeste)/c.res)-1)};}
+function solapa(c,R){const g=rangoCapa(c,R);return g.r0<=g.r1&&g.c0<=g.c1;}
+function bloquesCapas(R){if(!C1K)return"";return CAPAS.filter(c=>solapa(c,R)).map(c=>bloqueCapa(c,R)).join("");}
+function bloqueCapa(C,R){const g=rangoCapa(C,R);const cls=C[FILTRO?"clase":"clase_sin_filtro"];
+  let n=0,nM=0,nL=0,nF=0,nX=0,mv=[0,0,0,0];const V={pend:[],alb:[],rug:[]};const cand=[];
+  for(let r=g.r0;r<=g.r1;r++)for(let c=g.c0;c<=g.c1;c++){const i=r*C.ancho+c,k=cls[i];if(!k)continue;n++;if(k===4){nX++;mv[C.motivo[i]]++;continue;}
+    if(k===1)nM++;else if(k===2)nL++;else nF++;const p=dec.pendiente(C.pendiente[i]),a=dec.albedo(C.albedo[i]),gg=dec.rugosidad(C.rugosidad[i]);
+    if(p!=null)V.pend.push(p);if(a!=null)V.alb.push(a);if(gg!=null)V.rug.push(gg);if(k===1)cand.push({lat:C.lat_norte-(r+.5)*C.res,lon:C.lon_oeste+(c+.5)*C.res,tip:dec.tip_marte(C.tip_marte[i]),p,a});}
+  if(!n)return"";const ev=nM+nL+nF;const pM=ev?100*nM/ev:0,pL=ev?100*nL/ev:0;
+  let h='<h3 style="color:var(--acc)">'+C.nombre+' '+t("coT")+'</h3><div class="sub">'+fmt(n,0)+' '+t("coSub")+' · '+fmt(ev,0)+' '+t("coEval")+' ('+fmt(100*ev/n,1)+' %)</div>';
+  if(!FILTRO)h+='<div class="note" style="border-color:#e0a050">'+t("coSinAviso")+'</div>';
+  if(C.nan_filtro&&C.nan_filtro>0.5*C.pix)h+='<div class="note">'+t("polar")+'</div>';
+  h+='<div class="bar">'+[[nM,"--marte"],[nL,"--luna"],[nF,"--fuera"],[nX,"--noev"]].map(([v,c])=>'<div style="width:'+(100*v/n)+'%;background:var('+c+')"></div>').join("")+'</div>';
+  h+='<div class="kpis"><div class="kpi"><b style="color:var(--marte)">'+fmt(nM,0)+'</b><small>km² '+t("marte")+(ev?' · '+fmt(pM,0)+' % '+t("delEval"):'')+'</small></div><div class="kpi"><b>'+fmt(nL,0)+'</b><small>km² '+t("luna")+(ev?' · '+fmt(pL,0)+' % '+t("delEval"):'')+'</small></div><div class="kpi"><b style="color:var(--mut)">'+fmt(100*nX/n,1)+' %</b><small>'+t("noev")+'</small></div></div>';
+  if(nX)h+='<div class="note">'+t("coMot")+': '+t("coVH")+' '+fmt(100*mv[3]/nX,0)+' % · '+t("coV")+' '+fmt(100*mv[1]/nX,0)+' % · '+t("coH")+' '+fmt(100*mv[2]/nX,0)+' %</div>';
+  if(ev){const med={pend:pct(V.pend,.5),alb:pct(V.alb,.5),rug:pct(V.rug,.5)};
+    h+='<table><tr><th>'+t("var")+'</th><th>'+t("reg")+'</th><th>Arcadia</th><th>'+(L==="es"?"Marte":"Mars")+'</th><th>Shackleton</th><th>'+(L==="es"?"Luna polo S":"Moon S pole")+'</th></tr>';
+    for(const k of ["pend","alb","rug"]){const kv=KEYV[k];const d=DIG[k];const cell=ref=>{const o=enRango(med[k],ref);return fmt(ref[2],d)+' <span class="'+(o?"ok":"no")+'">'+(o?"✓":"✗")+'</span>';};
+      h+='<tr><td>'+t(k)+'</td><td class="reg">'+fmt(med[k],d)+'</td><td>'+cell(REF.arcadia[kv])+'</td><td>'+cell(REF.marte_franja[kv])+'</td><td>'+cell(REF.shackleton[kv])+'</td><td>'+cell(REF.luna_polo[kv])+'</td></tr>';}
+    h+='</table><div class="hist" style="margin-top:8px">'+histSVG("pend",V.pend)+histSVG("alb",V.alb)+histSVG("rug",V.rug)+'</div>';
+    cand.sort((x,y)=>(y.tip||0)-(x.tip||0));
+    h+='<h3>'+t("top")+' (1 km)</h3>'+(cand.length?'<table><tr><th>Lat, Lon</th><th>'+t("tipM")+'</th><th>'+t("pend")+'</th><th>'+t("alb")+'</th></tr>'+cand.slice(0,8).map(x=>'<tr><td>'+fmt(x.lat,3)+', '+fmt(x.lon,3)+'</td><td>'+fmt(x.tip,0)+'</td><td>'+fmt(x.p,2)+'</td><td>'+fmt(x.a,3)+'</td></tr>').join("")+'</table>':'<div class="note">'+t("sinM")+'</div>');}
+  h+='<div class="note">'+t("coNota")+'</div>';return h;}
+
+cargar().catch(e=>{document.getElementById("panel").innerHTML='<div class="empty">Error: '+e+'</div>';});
+</script>
+</body>
+</html>
