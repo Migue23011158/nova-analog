@@ -1,569 +1,271 @@
 {
  "umbral_clase": 60,
- "referencias": {
-  "arcadia": {
-   "nombre": "Arcadia Planitia",
-   "cuerpo": "Marte",
-   "lon": 184.3,
-   "lat": 47.2
-  },
-  "shackleton_borde": {
-   "nombre": "Borde de Shackleton",
-   "cuerpo": "Luna"
-  }
- },
+ "referencias": [
+  "shackleton_borde",
+  "arcadia"
+ ],
  "variables": [
-  "pendiente",
-  "inercia",
+  "pendiente_deg",
+  "ati",
   "albedo",
-  "ciclos_hielo",
-  "hielo",
-  "mineralogia"
+  "ciclos_hielo_frac"
  ],
  "pesos": {
   "movilidad": {
-   "pendiente": 0.35,
-   "inercia": 0.25,
-   "albedo": 0.1,
-   "ciclos_hielo": 0.1,
-   "hielo": 0.1,
-   "mineralogia": 0.1
+   "pendiente_deg": 0.5,
+   "ati": 0.25,
+   "albedo": 0.15,
+   "ciclos_hielo_frac": 0.1
   },
   "construccion": {
-   "pendiente": 0.1,
-   "inercia": 0.25,
-   "albedo": 0.1,
-   "ciclos_hielo": 0.1,
-   "hielo": 0.2,
-   "mineralogia": 0.25
+   "pendiente_deg": 0.2,
+   "ati": 0.4,
+   "albedo": 0.25,
+   "ciclos_hielo_frac": 0.15
   }
  },
- "modelo_presentable": false,
  "sitios": [
   {
    "nombre": "Sierra Nevada del Cocuy",
    "zona": "cocuy",
    "tipo": "nuevo",
-   "lon": -72.35,
+   "lon": -72.33,
    "lat": 6.45,
-   "procesado": true,
-   "valores": {
-    "pendiente_deg": 18.4,
-    "ati": 0.0275,
-    "albedo": 0.243,
-    "ciclos_hielo_frac": 0.85,
-    "hielo": 0.45,
-    "aridez_P_PET": 0.7
-   },
-   "puntuacion": {
-    "arcadia|movilidad": 41,
-    "arcadia|construccion": 44.2,
-    "shackleton_borde|movilidad": 67.5,
-    "shackleton_borde|construccion": 50.9
-   },
-   "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.084,
-     "inercia": 0.969,
-     "albedo": 0.994,
-     "ciclos_hielo": 0.011,
-     "hielo": 0.08,
-     "mineralogia": 0.3
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.084,
-     "inercia": 0.969,
-     "albedo": 0.994,
-     "ciclos_hielo": 0.011,
-     "hielo": 0.08,
-     "mineralogia": 0.3
-    },
-    "shackleton_borde|movilidad": {
-     "pendiente": 0.931,
-     "inercia": 0.458,
-     "albedo": 0.96,
-     "ciclos_hielo": null,
-     "hielo": 0.458,
-     "mineralogia": 0.25
-    },
-    "shackleton_borde|construccion": {
-     "pendiente": 0.931,
-     "inercia": 0.458,
-     "albedo": 0.96,
-     "ciclos_hielo": null,
-     "hielo": 0.458,
-     "mineralogia": 0.25
-    }
-   },
-   "confianza": {
-    "arcadia|movilidad": 1,
-    "arcadia|construccion": 1,
-    "shackleton_borde|movilidad": 1,
-    "shackleton_borde|construccion": 1
-   },
-   "clase": {
-    "movilidad": "Luna",
-    "construccion": "no coincide"
-   },
-   "filtrado": false,
-   "viaje_min": 300,
-   "modelo": {
-    "p_tierra": 0.62,
-    "p_marte": 0.31,
-    "p_luna": 0.07,
-    "clase": "Tierra",
-    "en_rango": true
-   }
+   "procesado": false,
+   "valores": {},
+   "puntuacion": {},
+   "desglose": {},
+   "clase": {},
+   "filtrado": null,
+   "confianza": {},
+   "viaje_min": 181.0
   },
   {
    "nombre": "Campo volcánico de Bayuda",
    "zona": "bayuda",
    "tipo": "nuevo",
-   "lon": 32.9,
-   "lat": 17.8,
-   "procesado": true,
-   "valores": {
-    "pendiente_deg": 3.8,
-    "ati": 0.029,
-    "albedo": 0.121,
-    "ciclos_hielo_frac": 0,
-    "hielo": 0,
-    "aridez_P_PET": 0.04
-   },
-   "puntuacion": {
-    "arcadia|movilidad": 81.2,
-    "arcadia|construccion": 71.4,
-    "shackleton_borde|movilidad": 38.6,
-    "shackleton_borde|construccion": 46.4
-   },
-   "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.991,
-     "inercia": 0.923,
-     "albedo": 0.885,
-     "ciclos_hielo": 0.458,
-     "hielo": 0,
-     "mineralogia": 1
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.991,
-     "inercia": 0.923,
-     "albedo": 0.885,
-     "ciclos_hielo": 0.458,
-     "hielo": 0,
-     "mineralogia": 1
-    },
-    "shackleton_borde|movilidad": {
-     "pendiente": 0.231,
-     "inercia": 0.375,
-     "albedo": 0.67,
-     "ciclos_hielo": null,
-     "hielo": 0.607,
-     "mineralogia": 0.45
-    },
-    "shackleton_borde|construccion": {
-     "pendiente": 0.231,
-     "inercia": 0.375,
-     "albedo": 0.67,
-     "ciclos_hielo": null,
-     "hielo": 0.607,
-     "mineralogia": 0.45
-    }
-   },
-   "confianza": {
-    "arcadia|movilidad": 0.99,
-    "arcadia|construccion": 0.99,
-    "shackleton_borde|movilidad": 0.99,
-    "shackleton_borde|construccion": 0.99
-   },
-   "clase": {
-    "movilidad": "Marte",
-    "construccion": "Marte"
-   },
-   "filtrado": false,
-   "viaje_min": 420,
-   "modelo": {
-    "p_tierra": 0.55,
-    "p_marte": 0.38,
-    "p_luna": 0.07,
-    "clase": "Tierra",
-    "en_rango": true
-   }
+   "lon": 32.75,
+   "lat": 18.33,
+   "procesado": false,
+   "valores": {},
+   "puntuacion": {},
+   "desglose": {},
+   "clase": {},
+   "filtrado": null,
+   "confianza": {},
+   "viaje_min": 859.0
   },
   {
    "nombre": "Harrat Khaybar",
    "zona": "khaybar",
    "tipo": "nuevo",
    "lon": 39.9,
-   "lat": 25.6,
-   "procesado": true,
-   "valores": {
-    "pendiente_deg": 3.8,
-    "ati": 0.03,
-    "albedo": 0.121,
-    "ciclos_hielo_frac": 0,
-    "hielo": 0,
-    "aridez_P_PET": 0.05
-   },
-   "puntuacion": {
-    "arcadia|movilidad": 80.1,
-    "arcadia|construccion": 70.4,
-    "shackleton_borde|movilidad": 37.3,
-    "shackleton_borde|construccion": 45.1
-   },
-   "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.99,
-     "inercia": 0.882,
-     "albedo": 0.886,
-     "ciclos_hielo": 0.458,
-     "hielo": 0,
-     "mineralogia": 1
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.99,
-     "inercia": 0.882,
-     "albedo": 0.886,
-     "ciclos_hielo": 0.458,
-     "hielo": 0,
-     "mineralogia": 1
-    },
-    "shackleton_borde|movilidad": {
-     "pendiente": 0.232,
-     "inercia": 0.325,
-     "albedo": 0.671,
-     "ciclos_hielo": null,
-     "hielo": 0.607,
-     "mineralogia": 0.45
-    },
-    "shackleton_borde|construccion": {
-     "pendiente": 0.232,
-     "inercia": 0.325,
-     "albedo": 0.671,
-     "ciclos_hielo": null,
-     "hielo": 0.607,
-     "mineralogia": 0.45
-    }
-   },
-   "confianza": {
-    "arcadia|movilidad": 0.85,
-    "arcadia|construccion": 0.85,
-    "shackleton_borde|movilidad": 0.85,
-    "shackleton_borde|construccion": 0.85
-   },
-   "clase": {
-    "movilidad": "Marte",
-    "construccion": "Marte"
-   },
-   "filtrado": false,
-   "viaje_min": 150,
-   "modelo": {
-    "p_tierra": 0.48,
-    "p_marte": 0.45,
-    "p_luna": 0.07,
-    "clase": "Tierra",
-    "en_rango": true
-   }
+   "lat": 25.5,
+   "procesado": false,
+   "valores": {},
+   "puntuacion": {},
+   "desglose": {},
+   "clase": {},
+   "filtrado": null,
+   "confianza": {},
+   "viaje_min": 450.0
   },
   {
    "nombre": "Tubos de lava de Undara",
    "zona": "undara",
    "tipo": "nuevo",
    "lon": 144.6,
-   "lat": -18.2,
-   "procesado": true,
-   "valores": {
-    "pendiente_deg": 3.7,
-    "ati": 0.03,
-    "albedo": 0.133,
-    "ciclos_hielo_frac": 0,
-    "hielo": null,
-    "aridez_P_PET": 0.45
-   },
-   "puntuacion": {
-    "arcadia|movilidad": 89.4,
-    "arcadia|construccion": 88.3,
-    "shackleton_borde|movilidad": 34.6,
-    "shackleton_borde|construccion": 41
-   },
-   "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.992,
-     "inercia": 0.882,
-     "albedo": 0.909,
-     "ciclos_hielo": 0.458,
-     "hielo": null,
-     "mineralogia": 1
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.992,
-     "inercia": 0.882,
-     "albedo": 0.909,
-     "ciclos_hielo": 0.458,
-     "hielo": null,
-     "mineralogia": 1
-    },
-    "shackleton_borde|movilidad": {
-     "pendiente": 0.228,
-     "inercia": 0.325,
-     "albedo": 0.704,
-     "ciclos_hielo": null,
-     "hielo": null,
-     "mineralogia": 0.45
-    },
-    "shackleton_borde|construccion": {
-     "pendiente": 0.228,
-     "inercia": 0.325,
-     "albedo": 0.704,
-     "ciclos_hielo": null,
-     "hielo": null,
-     "mineralogia": 0.45
-    }
-   },
-   "confianza": {
-    "arcadia|movilidad": 0.95,
-    "arcadia|construccion": 0.95,
-    "shackleton_borde|movilidad": 0.95,
-    "shackleton_borde|construccion": 0.95
-   },
-   "clase": {
-    "movilidad": "Marte",
-    "construccion": "Marte"
-   },
-   "filtrado": false,
-   "viaje_min": 240,
-   "modelo": {
-    "p_tierra": 0.81,
-    "p_marte": 0.14,
-    "p_luna": 0.05,
-    "clase": "Tierra",
-    "en_rango": true
-   }
+   "lat": -18.25,
+   "procesado": false,
+   "valores": {},
+   "puntuacion": {},
+   "desglose": {},
+   "clase": {},
+   "filtrado": null,
+   "confianza": {},
+   "viaje_min": 215.0
   },
   {
    "nombre": "Atacama, Yungay",
    "zona": "atacama",
    "tipo": "control",
-   "lon": -69.8,
+   "lon": -70.0,
    "lat": -24.1,
    "procesado": true,
    "valores": {
-    "pendiente_deg": 6.5,
-    "ati": 0.025,
-    "albedo": 0.45,
-    "ciclos_hielo_frac": 0.05,
-    "hielo": 0.05,
-    "aridez_P_PET": 0
+    "pendiente_deg": 1.7837,
+    "rugosidad_m": 8.4587,
+    "lst_dia_K": 315.7829,
+    "lst_noche_K": 282.7701,
+    "amplitud_K": 33.0128,
+    "albedo": 0.2627,
+    "ati": 0.0223,
+    "aridez_P_PET": 0.0001,
+    "humedad_suelo_mm": 0.0,
+    "cobertura": 1.0
    },
    "puntuacion": {
-    "arcadia|movilidad": 69.8,
-    "arcadia|construccion": 52.4,
-    "shackleton_borde|movilidad": 52,
-    "shackleton_borde|construccion": 52.2
+    "shackleton_borde|movilidad": 54.6,
+    "arcadia|movilidad": 93.1,
+    "shackleton_borde|construccion": 61.7,
+    "arcadia|construccion": 90.6
    },
    "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.872,
-     "inercia": 1,
-     "albedo": 0.516,
-     "ciclos_hielo": 0.607,
-     "hielo": 0,
-     "mineralogia": 0.3
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.872,
-     "inercia": 1,
-     "albedo": 0.516,
-     "ciclos_hielo": 0.607,
-     "hielo": 0,
-     "mineralogia": 0.3
-    },
     "shackleton_borde|movilidad": {
-     "pendiente": 0.415,
-     "inercia": 0.607,
-     "albedo": 0.755,
-     "ciclos_hielo": null,
-     "hielo": 0.755,
-     "mineralogia": 0.2
+     "pendiente_deg": 0.44,
+     "ati": 0.97,
+     "albedo": 0.19
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.96,
+     "ati": 0.97,
+     "albedo": 0.76
     },
     "shackleton_borde|construccion": {
-     "pendiente": 0.415,
-     "inercia": 0.607,
-     "albedo": 0.755,
-     "ciclos_hielo": null,
-     "hielo": 0.755,
-     "mineralogia": 0.2
+     "pendiente_deg": 0.44,
+     "ati": 0.97,
+     "albedo": 0.19
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.96,
+     "ati": 0.97,
+     "albedo": 0.76
     }
-   },
-   "confianza": {
-    "arcadia|movilidad": 1,
-    "arcadia|construccion": 1,
-    "shackleton_borde|movilidad": 1,
-    "shackleton_borde|construccion": 1
    },
    "clase": {
     "movilidad": "Marte",
-    "construccion": "no coincide"
+    "construccion": "Marte"
    },
    "filtrado": false,
-   "viaje_min": 120,
-   "modelo": {
-    "p_tierra": 0.22,
-    "p_marte": 0.71,
-    "p_luna": 0.07,
-    "clase": "Marte",
-    "en_rango": true
-   }
+   "confianza": {
+    "shackleton_borde|movilidad": 1.0,
+    "arcadia|movilidad": 1.0,
+    "shackleton_borde|construccion": 1.0,
+    "arcadia|construccion": 1.0
+   },
+   "viaje_min": 211.0
   },
   {
    "nombre": "Cráter Haughton, isla Devon",
    "zona": "devon",
    "tipo": "control",
-   "lon": -89.7,
+   "lon": -89.8,
    "lat": 75.4,
    "procesado": true,
    "valores": {
-    "pendiente_deg": 8.9,
-    "ati": 0.0275,
-    "albedo": 0.273,
-    "ciclos_hielo_frac": 0.35,
-    "hielo": 0.9,
-    "aridez_P_PET": 0.15
+    "pendiente_deg": 3.4517,
+    "rugosidad_m": 10.5138,
+    "lst_dia_K": 278.5343,
+    "lst_noche_K": 274.0615,
+    "amplitud_K": 4.4728,
+    "albedo": null,
+    "ati": null,
+    "aridez_P_PET": 1.9651,
+    "humedad_suelo_mm": 7.8283,
+    "precip_anual_mm": 198.9384,
+    "cobertura": 0.8
    },
    "puntuacion": {
-    "arcadia|movilidad": 79.6,
-    "arcadia|construccion": 77,
-    "shackleton_borde|movilidad": 50.6,
-    "shackleton_borde|construccion": 37.6
+    "shackleton_borde|movilidad": 60.2,
+    "arcadia|movilidad": 87.2,
+    "shackleton_borde|construccion": 60.2,
+    "arcadia|construccion": 87.2
    },
    "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.684,
-     "inercia": 0.969,
-     "albedo": 0.965,
-     "ciclos_hielo": 0.882,
-     "hielo": 1,
-     "mineralogia": 0.3
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.684,
-     "inercia": 0.969,
-     "albedo": 0.965,
-     "ciclos_hielo": 0.882,
-     "hielo": 1,
-     "mineralogia": 0.3
-    },
     "shackleton_borde|movilidad": {
-     "pendiente": 0.62,
-     "inercia": 0.458,
-     "albedo": 0.991,
-     "ciclos_hielo": null,
-     "hielo": 0.002,
-     "mineralogia": 0.25
+     "pendiente_deg": 0.6,
+     "ati": null,
+     "albedo": null
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.87,
+     "ati": null,
+     "albedo": null
     },
     "shackleton_borde|construccion": {
-     "pendiente": 0.62,
-     "inercia": 0.458,
-     "albedo": 0.991,
-     "ciclos_hielo": null,
-     "hielo": 0.002,
-     "mineralogia": 0.25
+     "pendiente_deg": 0.6,
+     "ati": null,
+     "albedo": null
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.87,
+     "ati": null,
+     "albedo": null
     }
-   },
-   "confianza": {
-    "arcadia|movilidad": 0.86,
-    "arcadia|construccion": 0.86,
-    "shackleton_borde|movilidad": 0.86,
-    "shackleton_borde|construccion": 0.86
    },
    "clase": {
     "movilidad": "Marte",
     "construccion": "Marte"
    },
    "filtrado": false,
-   "viaje_min": 3600,
-   "modelo": {
-    "p_tierra": 0.12,
-    "p_marte": 0.83,
-    "p_luna": 0.05,
-    "clase": "Marte",
-    "en_rango": true
-   }
+   "confianza": {
+    "shackleton_borde|movilidad": 0.44,
+    "arcadia|movilidad": 0.44,
+    "shackleton_borde|construccion": 0.19,
+    "arcadia|construccion": 0.19
+   },
+   "viaje_min": 8113.0
   },
   {
    "nombre": "Svalbard, Bockfjorden",
    "zona": "svalbard",
    "tipo": "conocido",
-   "lon": 13.9,
-   "lat": 79.4,
+   "lon": 13.33,
+   "lat": 79.43,
    "procesado": true,
    "valores": {
-    "pendiente_deg": 10.6,
-    "ati": 0.0275,
-    "albedo": 0.124,
-    "ciclos_hielo_frac": 0.45,
-    "hielo": 0.85,
-    "aridez_P_PET": 0.45
+    "pendiente_deg": 12.5092,
+    "rugosidad_m": 58.3648,
+    "lst_dia_K": 278.3722,
+    "lst_noche_K": 276.0687,
+    "amplitud_K": 2.3035,
+    "albedo": 0.1881,
+    "ati": 0.3773,
+    "aridez_P_PET": 6.9694,
+    "humedad_suelo_mm": 9.9942,
+    "precip_anual_mm": 572.385,
+    "cobertura": 0.9
    },
    "puntuacion": {
-    "arcadia|movilidad": 77.8,
-    "arcadia|construccion": 89,
-    "shackleton_borde|movilidad": 54.9,
-    "shackleton_borde|construccion": 41.3
+    "shackleton_borde|movilidad": null,
+    "arcadia|movilidad": null,
+    "shackleton_borde|construccion": null,
+    "arcadia|construccion": null
    },
    "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.54,
-     "inercia": 0.969,
-     "albedo": 0.892,
-     "ciclos_hielo": 0.607,
-     "hielo": 0.969,
-     "mineralogia": 1
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.54,
-     "inercia": 0.969,
-     "albedo": 0.892,
-     "ciclos_hielo": 0.607,
-     "hielo": 0.969,
-     "mineralogia": 1
-    },
     "shackleton_borde|movilidad": {
-     "pendiente": 0.761,
-     "inercia": 0.458,
-     "albedo": 0.68,
-     "ciclos_hielo": null,
-     "hielo": 0.005,
-     "mineralogia": 0.45
+     "pendiente_deg": 0.39,
+     "ati": 0.0,
+     "albedo": 0.73
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.32,
+     "ati": 0.0,
+     "albedo": 0.8
     },
     "shackleton_borde|construccion": {
-     "pendiente": 0.761,
-     "inercia": 0.458,
-     "albedo": 0.68,
-     "ciclos_hielo": null,
-     "hielo": 0.005,
-     "mineralogia": 0.45
+     "pendiente_deg": 0.39,
+     "ati": 0.0,
+     "albedo": 0.73
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.32,
+     "ati": 0.0,
+     "albedo": 0.8
     }
    },
-   "confianza": {
-    "arcadia|movilidad": 0.95,
-    "arcadia|construccion": 0.95,
-    "shackleton_borde|movilidad": 0.95,
-    "shackleton_borde|construccion": 0.95
-   },
    "clase": {
-    "movilidad": "Marte",
-    "construccion": "Marte"
+    "movilidad": null,
+    "construccion": null
    },
-   "filtrado": false,
-   "viaje_min": 900,
-   "modelo": {
-    "p_tierra": 0.3,
-    "p_marte": 0.64,
-    "p_luna": 0.06,
-    "clase": "Marte",
-    "en_rango": true
-   }
+   "filtrado": true,
+   "confianza": {
+    "shackleton_borde|movilidad": 0.9,
+    "arcadia|movilidad": 0.9,
+    "shackleton_borde|construccion": 0.9,
+    "arcadia|construccion": 0.9
+   },
+   "viaje_min": 4462.0
   },
   {
    "nombre": "Valles Secos de McMurdo",
@@ -573,72 +275,58 @@
    "lat": -77.5,
    "procesado": true,
    "valores": {
-    "pendiente_deg": 7.5,
-    "ati": 0.025,
-    "albedo": 0.22,
-    "ciclos_hielo_frac": 0.15,
-    "hielo": 0.75,
-    "aridez_P_PET": 0
+    "pendiente_deg": 14.4516,
+    "rugosidad_m": 75.6274,
+    "lst_dia_K": 263.4138,
+    "lst_noche_K": 259.4031,
+    "amplitud_K": 4.0107,
+    "albedo": 0.0895,
+    "ati": 0.2565,
+    "aridez_P_PET": null,
+    "humedad_suelo_mm": 50.0,
+    "precip_anual_mm": 173.4879,
+    "cobertura": 0.9
    },
    "puntuacion": {
-    "arcadia|movilidad": 83.2,
-    "arcadia|construccion": 76.9,
-    "shackleton_borde|movilidad": 52.5,
-    "shackleton_borde|construccion": 47.1
+    "shackleton_borde|movilidad": 42.4,
+    "arcadia|movilidad": 5.3,
+    "shackleton_borde|construccion": 31.0,
+    "arcadia|construccion": 5.7
    },
    "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.795,
-     "inercia": 1,
-     "albedo": 1,
-     "ciclos_hielo": 0.882,
-     "hielo": 0.755,
-     "mineralogia": 0.4
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.795,
-     "inercia": 1,
-     "albedo": 1,
-     "ciclos_hielo": 0.882,
-     "hielo": 0.755,
-     "mineralogia": 0.4
-    },
     "shackleton_borde|movilidad": {
-     "pendiente": 0.503,
-     "inercia": 0.607,
-     "albedo": 0.923,
-     "ciclos_hielo": null,
-     "hielo": 0.023,
-     "mineralogia": 0.5
+     "pendiente_deg": 0.59,
+     "ati": 0.0,
+     "albedo": 0.58
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.05,
+     "ati": 0.0,
+     "albedo": 0.15
     },
     "shackleton_borde|construccion": {
-     "pendiente": 0.503,
-     "inercia": 0.607,
-     "albedo": 0.923,
-     "ciclos_hielo": null,
-     "hielo": 0.023,
-     "mineralogia": 0.5
+     "pendiente_deg": 0.59,
+     "ati": 0.0,
+     "albedo": 0.58
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.05,
+     "ati": 0.0,
+     "albedo": 0.15
     }
    },
-   "confianza": {
-    "arcadia|movilidad": 1,
-    "arcadia|construccion": 1,
-    "shackleton_borde|movilidad": 1,
-    "shackleton_borde|construccion": 1
-   },
    "clase": {
-    "movilidad": "Marte",
-    "construccion": "Marte"
+    "movilidad": "no coincide",
+    "construccion": "no coincide"
    },
    "filtrado": false,
-   "viaje_min": null,
-   "modelo": {
-    "p_tierra": 0.1,
-    "p_marte": 0.81,
-    "p_luna": 0.09,
-    "clase": "Marte",
-    "en_rango": true
-   }
+   "confianza": {
+    "shackleton_borde|movilidad": 0.9,
+    "arcadia|movilidad": 0.9,
+    "shackleton_borde|construccion": 0.9,
+    "arcadia|construccion": 0.9
+   },
+   "viaje_min": null
   },
   {
    "nombre": "Death Valley",
@@ -648,73 +336,57 @@
    "lat": 36.5,
    "procesado": true,
    "valores": {
-    "pendiente_deg": 7,
-    "ati": 0.025,
-    "albedo": 0.445,
-    "ciclos_hielo_frac": 0,
-    "hielo": 0,
-    "aridez_P_PET": 0.03
+    "pendiente_deg": 0.3815,
+    "rugosidad_m": 0.8545,
+    "lst_dia_K": 310.9052,
+    "lst_noche_K": 295.1492,
+    "amplitud_K": 15.7559,
+    "albedo": 0.2573,
+    "ati": 0.0471,
+    "aridez_P_PET": 0.0183,
+    "humedad_suelo_mm": 0.0,
+    "cobertura": 1.0
    },
    "puntuacion": {
-    "arcadia|movilidad": 67,
-    "arcadia|construccion": 50.7,
-    "shackleton_borde|movilidad": 52.3,
-    "shackleton_borde|construccion": 49.6
+    "shackleton_borde|movilidad": 26.2,
+    "arcadia|movilidad": 62.2,
+    "shackleton_borde|construccion": 22.4,
+    "arcadia|construccion": 45.3
    },
    "desglose": {
-    "arcadia|movilidad": {
-     "pendiente": 0.832,
-     "inercia": 1,
-     "albedo": 0.531,
-     "ciclos_hielo": 0.458,
-     "hielo": 0,
-     "mineralogia": 0.3
-    },
-    "arcadia|construccion": {
-     "pendiente": 0.832,
-     "inercia": 1,
-     "albedo": 0.531,
-     "ciclos_hielo": 0.458,
-     "hielo": 0,
-     "mineralogia": 0.3
-    },
     "shackleton_borde|movilidad": {
-     "pendiente": 0.461,
-     "inercia": 0.607,
-     "albedo": 0.769,
-     "ciclos_hielo": null,
-     "hielo": 0.607,
-     "mineralogia": 0.2
+     "pendiente_deg": 0.32,
+     "ati": 0.18,
+     "albedo": 0.22
+    },
+    "arcadia|movilidad": {
+     "pendiente_deg": 0.86,
+     "ati": 0.03,
+     "albedo": 0.81
     },
     "shackleton_borde|construccion": {
-     "pendiente": 0.461,
-     "inercia": 0.607,
-     "albedo": 0.769,
-     "ciclos_hielo": null,
-     "hielo": 0.607,
-     "mineralogia": 0.2
+     "pendiente_deg": 0.32,
+     "ati": 0.18,
+     "albedo": 0.22
+    },
+    "arcadia|construccion": {
+     "pendiente_deg": 0.86,
+     "ati": 0.03,
+     "albedo": 0.81
     }
-   },
-   "confianza": {
-    "arcadia|movilidad": 0.88,
-    "arcadia|construccion": 0.88,
-    "shackleton_borde|movilidad": 0.88,
-    "shackleton_borde|construccion": 0.88
    },
    "clase": {
     "movilidad": "Marte",
     "construccion": "no coincide"
    },
    "filtrado": false,
-   "viaje_min": 150,
-   "modelo": {
-    "p_tierra": 0.35,
-    "p_marte": 0.58,
-    "p_luna": 0.07,
-    "clase": "Marte",
-    "en_rango": true
-   }
+   "confianza": {
+    "shackleton_borde|movilidad": 1.0,
+    "arcadia|movilidad": 1.0,
+    "shackleton_borde|construccion": 1.0,
+    "arcadia|construccion": 1.0
+   },
+   "viaje_min": 140.0
   }
- ],
- "_prueba": "DATOS SIMULADOS de la demo v5. Reemplazar por el sitios.json de Karen."
+ ]
 }
