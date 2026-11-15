@@ -1948,3 +1948,13 @@ small, .image-meta, .eyebrow, .site-caption p, .metric-value small, .metric-head
   border: 1px solid rgba(59, 163, 255, 0.5); color: #cfe2ff; text-decoration: none; font: 15px 'Space Grotesk', sans-serif;
 }
 .comparador-link:hover { background: rgba(59, 163, 255, 0.12); }
+/* v7.8: sin rayas entre teselas (también con zoom del navegador ≠ 100 %) */
+.site-image .leaflet-container { background: #0b111c; }
+.site-image .leaflet-tile-container img.leaflet-tile { width: 257px !important; height: 257px !important; }
+.site-image .leaflet-tile { image-rendering: auto; }
+/* v7.8b: "Arrastra para girar" arriba del selector, para que no tape el globo */
+@media (min-width: 801px) {
+  .globe-hint { top: 104px; }
+  /* En español el título ocupa dos líneas y no queda espacio: se oculta la ayuda (arrastrar sigue funcionando) */
+  html[lang="es"] .globe-hint { display: none; }
+}

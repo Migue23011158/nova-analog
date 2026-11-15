@@ -578,7 +578,7 @@ function EarthGlobe({ sitios, sel, miPos, cuerpo = 'tierra', lang, onSelect, onC
     const g = globeRef.current;
     if (!g || !miPos || cuerpo !== 'tierra') return;
     g.controls().autoRotate = false;
-    g.pointOfView({ lat: miPos.lat, lng: miPos.lon, altitude: 1.6 }, 1200);
+    g.pointOfView({ lat: miPos.lat, lng: miPos.lon, altitude: 0.45 }, 1800);
   }, [miPos]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Piel del globo: fotos de Esri (Tierra) o textura de Marte / la Luna (fija, sin zoom ni arrastre)
@@ -899,9 +899,9 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
             <span className="image-meta">{t('TOCA EL MAPA PARA CONSULTAR CUALQUIER PUNTO')}</span>
           </div>
           <div className="site-image">
-            <MapContainer key={sel.zona} center={[sel.lat, sel.lon]} zoom={10} minZoom={3}
+            <MapContainer key={sel.zona} center={[sel.lat, sel.lon]} zoom={10} minZoom={3} maxZoom={18}
               zoomControl={false} attributionControl={false} style={{ height: '100%', width: '100%' }}>
-              <TileLayer url={ESRI} />
+              <TileLayer url={ESRI} maxNativeZoom={16} maxZoom={18} />
               <ClickPunto onPick={elegirPunto} />
               {punto && (
                 <CircleMarker center={[punto.lat, punto.lon]} radius={9}
