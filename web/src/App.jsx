@@ -71,7 +71,9 @@ const EN = {
   'Índice: {c}': 'Index: {c}', 'Modelo: {c}': 'Model: {c}',
   // Comparar
   'TIERRA': 'EARTH', 'TOCA EL MAPA PARA CONSULTAR CUALQUIER PUNTO': 'TAP THE MAP TO CHECK ANY POINT', 'IMAGEN ORBITAL': 'ORBITAL IMAGE',
-  'Imagen orbital de {r}': 'Orbital image of {r}', 'clase si ≥ {n}': 'class if ≥ {n}',
+  'Imagen orbital de {r}': 'Orbital image of {r}',
+  'SIMILITUD CON {r}': 'SIMILARITY TO {r}', 'Clase del sitio: {c}': 'Site class: {c}',
+  'mejor coincidencia: {r} {n}': 'best match: {r} {n}', 'clase si ≥ {n}': 'class if ≥ {n}',
   '{n} variables · confianza {c}': '{n} variables · confidence {c}', 'Variables con dato que entran al índice': 'Variables with data that enter the index',
   'Variables con dato que entran al índice, y confianza según los datos disponibles': 'Variables with data that enter the index, and confidence given the available data',
   'Índice de similitud 0–100 · no es una probabilidad': 'Similarity index 0–100 · not a probability',
@@ -127,7 +129,7 @@ const tClase = (c) => (c && c.startsWith('Ninguna (filtro') ? t('Ninguna (filtro
 const REFS = {
   arcadia: tabla({
     target: 'mars', cuerpo: 'Marte', nombre: 'Arcadia Planitia', corto: 'Arcadia',
-    coords: '47.2° N, 184.3° E', img: 'arcadia.jpg', credito: 'NASA/JPL-Caltech/UArizona (HiRISE)',
+    coords: '47.2° N, 184.3° E', img: 'arcadia.jpg', credito: 'NASA/JPL/USGS (Viking MDIM 2.1)',
     lat: 47.2, lon: -175.7,
   }),
   shackleton_borde: tabla({
@@ -309,7 +311,7 @@ export default function App() {
   const [cuerpo, setCuerpo] = useState('tierra');
   const [lang, setLang] = useState(() => {
     try { const g = localStorage.getItem('nova_lang'); if (g === 'es' || g === 'en') return g; } catch { /* sin almacenamiento */ }
-    return 'en';
+    return 'en';   // inglés por defecto; el botón ES / EN cambia a español
   });
   LANG = lang;
   useEffect(() => {
@@ -440,10 +442,10 @@ export default function App() {
       <header className="topbar">
         <Logo />
         <div className="segmented target-switch">
-          <button className={target === 'mars' ? 'active mars-tab' : ''} onClick={() => setTarget('mars')}>
+          <button className={`mars-tab ${target === 'mars' ? 'active' : ''}`} onClick={() => setTarget('mars')}>
             <span /> {t('Marte · Arcadia Planitia')}
           </button>
-          <button className={target === 'moon' ? 'active moon-tab' : ''} onClick={() => setTarget('moon')}>
+          <button className={`moon-tab ${target === 'moon' ? 'active' : ''}`} onClick={() => setTarget('moon')}>
             <span /> {t('Luna · Borde de Shackleton')}
           </button>
         </div>
@@ -567,8 +569,17 @@ function EarthGlobe({ sitios, sel, miPos, cuerpo = 'tierra', lang, onSelect, onC
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
 
+  const vistaRef = useRef('');
   const cfg = CUERPOS[cuerpo];
   const refC = cfg.ref ? REFS[cfg.ref] : null;
+
+  // Al activar "Mi ubicación", el globo gira hasta la posición del usuario
+  useEffect(() => {
+    const g = globeRef.current;
+    if (!g || !miPos || cuerpo !== 'tierra') return;
+    g.controls().autoRotate = false;
+    g.pointOfView({ lat: miPos.lat, lng: miPos.lon, altitude: 1.6 }, 1200);
+  }, [miPos]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Piel del globo: fotos de Esri (Tierra) o textura de Marte / la Luna (fija, sin zoom ni arrastre)
   useEffect(() => {
@@ -601,6 +612,7 @@ function EarthGlobe({ sitios, sel, miPos, cuerpo = 'tierra', lang, onSelect, onC
       void lang;
       // Shackleton está en el polo: se inclina la vista para que el marcador se vea
       g.pointOfView({ lat: Math.max(-62, Math.min(62, refC.lat)), lng: refC.lon, altitude: 2.9 }, 900);
+      vistaRef.current = '';
       return;
     }
     const pts = sitios.map((s) => ({
@@ -614,7 +626,12 @@ function EarthGlobe({ sitios, sel, miPos, cuerpo = 'tierra', lang, onSelect, onC
     if (miPos) pts.push({ lat: miPos.lat, lon: miPos.lon, color: '#3BA3FF', alt: 0.02, r: 0.45, label: t('Tu ubicación') });
     g.pointsData(pts);
     g.ringsData([{ lat: sel.lat, lon: sel.lon }]);
-    g.pointOfView({ lat: sel.lat, lng: sel.lon, altitude: 2.9 }, 900);
+    // Solo se mueve la cámara si cambió el sitio o el cuerpo (no al activar la ubicación)
+    const clave = `${sel.zona}|${cuerpo}`;
+    if (vistaRef.current !== clave) {
+      vistaRef.current = clave;
+      g.pointOfView({ lat: sel.lat, lng: sel.lon, altitude: 2.9 }, 900);
+    }
   }, [sitios, sel, miPos, cuerpo, lang]);
 
   return (
@@ -870,10 +887,11 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
   const nivelConf = nivelDe(conf);
   const score = evaluable ? indiceRef(sel, refKey) : null;
   const otrosIndices = refs.map((rk) => ({ rk, x: evaluable ? indiceRef(sel, rk) : null }));
+  const mejor = otrosIndices.filter((o) => o.x !== null).sort((a, b) => b.x - a.x)[0];
 
   return (
     <main className={`compare-view ${target}`}>
-      <div className="compare-visual">
+      <div className={`compare-visual glow-${target}`} key={`${sel.zona}-${target}`}>
         {/* TIERRA: mapa satelital real, con zoom */}
         <section className="site-panel earth">
           <div className="site-heading">
@@ -923,20 +941,23 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
         </section>
 
         <div className={`score-wrap ${target} ${score === null ? 'no-score' : ''}`}>
+          <p className="score-title">{t('SIMILITUD CON {r}', { r: ref.corto.toUpperCase() })}</p>
           <div className="score-ring" style={{ '--score': `${(score ?? 0) * 3.6}deg` }}>
             <div><strong>{score === null ? '—' : fmtIdx(score)}</strong><span>/ 100</span></div>
           </div>
-          <p>{t('ÍNDICE VS. {r}', { r: ref.corto.toUpperCase() })}</p>
-          <div className={`score-class c-${sel.kind}`}>{CLASE_TXT[sel.kind]}</div>
-          <small>
-            {otrosIndices.map((o, i) => (
-              <span key={o.rk}>{i > 0 && ' · '}{REFS[o.rk]?.cuerpo} {o.x === null ? '—' : fmtIdx(o.x)}</span>
-            ))} · {t('clase si ≥ {n}', { n: umbral })}
-          </small>
         </div>
       </div>
 
       <div className="score-notes">
+        <span className={`score-note clase-note c-${sel.kind}`}>
+          {t('Clase del sitio: {c}', { c: CLASE_TXT[sel.kind] })}
+          {mejor && mejor.rk !== refKey && ` (${t('mejor coincidencia: {r} {n}', { r: REFS[mejor.rk]?.corto, n: fmtIdx(mejor.x) })})`}
+        </span>
+        <span className="score-note">
+          {otrosIndices.map((o, i) => (
+            <span key={o.rk}>{i > 0 && ' · '}{REFS[o.rk]?.cuerpo} {o.x === null ? '—' : fmtIdx(o.x)}</span>
+          ))} · {t('clase si ≥ {n}', { n: umbral })}
+        </span>
           {evaluable && (
           <span className="score-note" title={t('Variables con dato que entran al índice')}>
             {t('{n} variables · confianza {c}', { n: filas.filter((f) => !f.noAplica && f.sim !== null).length, c: nivelConf ? t(nivelConf.toLowerCase()) : t('sin dato') })}
@@ -959,6 +980,10 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
           </button>
         ))}
       </section>
+
+      <a className="comparador-link" href={BASE + 'comparador/comparador.html'} target="_blank" rel="noopener noreferrer">
+        {LANG === 'en' ? 'Compare any region →' : 'Comparar cualquier región →'}
+      </a>
 
       <section className="conclusion">
         <span>{t('CONCLUSIÓN')}</span>
