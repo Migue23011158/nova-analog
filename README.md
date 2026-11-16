@@ -48,6 +48,7 @@ This project was built with AI assistance, as required by the Space Apps rules:
 - **Claude (Anthropic):** data-processing scripts, web app logic and layout, translation, verification.
 - **Gemini (Google):** early versions of the web app code.
 - **Figma Make:** initial visual design of the interface.
+- **Gemini (Google):** team logo and app icon (AI-generated).
 
 All results, numbers and decisions were reviewed by the team.
 
@@ -114,6 +115,7 @@ Este proyecto se hizo con ayuda de IA, como piden las reglas de Space Apps:
 - **Claude (Anthropic):** scripts de procesamiento de datos, lógica y diseño de la aplicación web, traducción, verificación.
 - **Gemini (Google):** primeras versiones del código de la aplicación.
 - **Figma Make:** diseño visual inicial de la interfaz.
+- **Gemini (Google):** logo del equipo e ícono de la aplicación (generados con IA).
 
 El equipo revisó todos los resultados, cifras y decisiones.
 
