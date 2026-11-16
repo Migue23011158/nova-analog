@@ -29,6 +29,7 @@ h2{font-size:15px;margin:2px 0 6px}h3{font-size:13px;margin:16px 0 6px;color:var
 .bar{display:flex;height:16px;border-radius:4px;overflow:hidden;border:1px solid var(--line);margin:6px 0}
 .bar div{height:100%}
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.sat{position:relative;overflow:hidden;height:220px;margin:8px 0 12px;border:1px solid var(--line);border-radius:10px;background:#0b1f33}.sat img{position:absolute;width:256px;height:256px;max-width:none}.sat .satno{position:absolute;inset:0;display:grid;place-items:center;padding:12px;text-align:center;color:var(--mut);font-size:12px}.sat .satbox{position:absolute;border:2px dashed var(--acc);border-radius:2px;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.45)}.sat .satpt{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;border:2px solid var(--acc)}.sat .satcap{position:absolute;left:8px;bottom:6px;font-size:10.5px;color:#e6ebf3;background:rgba(11,18,32,.75);padding:2px 6px;border-radius:5px}.sat .satz{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px;z-index:3}.sat .satz button{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:rgba(11,18,32,.85);color:var(--txt);font-size:16px;cursor:pointer}.sat .satver{position:absolute;right:8px;bottom:6px;z-index:3;font-size:11px;color:#e6ebf3;background:rgba(11,18,32,.8);padding:3px 8px;border-radius:6px;text-decoration:none;border:1px solid var(--line)}.sat img,.sat .satbox,.sat .satpt{transition:none}.sat-msg{height:auto;padding:12px;color:var(--mut);font-size:12.5px}
 .kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px}
 .kpi b{display:block;font-size:20px}.kpi small{color:var(--mut);font-size:11.5px}
 table{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -87,7 +88,7 @@ const PRESETS=[
  ["Arabia central",[20,40,27,48]],["Islandia",[63.3,-24.5,66.6,-13.5]]];
 const T={es:{titulo:"Comparador de regiones",subt:"Selecciona cualquier parte de la Tierra y compárala con Marte (Arcadia) y la Luna (Shackleton).",selec:"✚ Seleccionar",mover:"✋ Mover",mundo:"Mundo",ir:"Ir a:",
  hint:"Arrastra para seleccionar una región · clic para ver un punto · rueda para acercar",lgM:"Parecido a Marte",lgL:"Parecido a la Luna",lgF:"Evaluado, no se parece",lgX:"No evaluado (húmedo, vegetación, hielo o ciudad)",cargando:"Cargando datos…",
- vacio:"Arrastra un rectángulo sobre el mapa (o elige un lugar en “Ir a”) para comparar esa región con Marte y la Luna.",region:"Región seleccionada",punto:"Punto",tierra:"celdas de tierra",area:"km² de tierra",eval:"evaluado",
+ satGrande:"Región muy grande para la vista satelital: selecciona una zona más pequeña.",satNo:"Vista satelital no disponible (requiere conexión).",satCap:"Vista satelital · Esri World Imagery",satVer:"Ver terreno ↗",vacio:"Arrastra un rectángulo sobre el mapa (o elige un lugar en “Ir a”) para comparar esa región con Marte y la Luna.",region:"Región seleccionada",punto:"Punto",tierra:"celdas de tierra",area:"km² de tierra",eval:"evaluado",
  compo:"Qué dice el modelo",marte:"Marte",luna:"Luna",fuera:"No se parece",noev:"No evaluado",delEval:"del terreno evaluado",
  vsMundo:"El mundo: {b} %. Esta región: {r} % → {x}× la tasa mundial.",nada:"Nada del terreno pasa el filtro (húmedo, con vegetación, hielo o ciudad): el modelo no la evalúa.",
  comp:"Comparación de variables (mediana del terreno evaluado)",var:"Variable",reg:"Región",pend:"Pendiente (°)",alb:"Albedo",rug:"Rugosidad (m)",dentro:"¿Dentro del rango típico (p10–p90)?",
@@ -99,7 +100,7 @@ const T={es:{titulo:"Comparador de regiones",subt:"Selecciona cualquier parte de
  copiar:"Copiar resumen",copiado:"Copiado",cel:"celdas",filSi:"Filtro: activado",filNo:"Filtro: desactivado",c1kSi:"Detalle 1 km: visible",c1kNo:"Detalle 1 km: oculto",sfMundo:"Filtro desactivado: todo el terreno se clasifica solo por pendiente y albedo, incluidas selvas, cultivos, nieve y ciudades. Muestra lo que ve el modelo; no es un resultado de análogos.",polar:"Sin datos de NDVI ni aridez en esta zona polar: se evalúa todo (roca y hielo).",coF:"Colombia 1 km: con filtro",coS:"Colombia 1 km: sin filtro",coO:"Colombia 1 km: oculto",coT:"a 1 km (detalle)",coSub:"píxeles de ~1 km",coEval:"pasan el filtro",coMot:"Por qué no se evalúa",coVH:"vegetación y húmedo",coV:"solo vegetación",coH:"solo húmedo",coSinAviso:"Modo sin filtro: el modelo clasifica todo solo por pendiente y albedo, incluida selva y páramo. Sirve para ver qué ve el modelo, no como resultado: muchas celdas oscuras y empinadas de los Andes caen en “Luna” por pura forma.",coNota:"Capa 1 km: mismas variables del modelo, calculadas a ~1 km para Colombia. Filtro a 1 km: se excluye NDVI ≥ 0,25 y lo húmedo (P/PET ≥ 0,5 y lluvia ≥ 250 mm) salvo ciclos de hielo ≥ 0,5."},
  en:{titulo:"Region comparator",subt:"Select any part of Earth and compare it with Mars (Arcadia) and the Moon (Shackleton).",selec:"✚ Select",mover:"✋ Pan",mundo:"World",ir:"Go to:",
  hint:"Drag to select a region · click for a point · scroll to zoom",lgM:"Mars-like",lgL:"Moon-like",lgF:"Evaluated, not similar",lgX:"Not evaluated (wet, vegetated, ice or urban)",cargando:"Loading data…",
- vacio:"Drag a rectangle on the map (or pick a place in “Go to”) to compare that region with Mars and the Moon.",region:"Selected region",punto:"Point",tierra:"land cells",area:"km² of land",eval:"evaluated",
+ satGrande:"Region too large for the satellite view: select a smaller area.",satNo:"Satellite view unavailable (requires a connection).",satCap:"Satellite view · Esri World Imagery",satVer:"View terrain ↗",vacio:"Drag a rectangle on the map (or pick a place in “Go to”) to compare that region with Mars and the Moon.",region:"Selected region",punto:"Point",tierra:"land cells",area:"km² of land",eval:"evaluated",
  compo:"What the model says",marte:"Mars",luna:"Moon",fuera:"Not similar",noev:"Not evaluated",delEval:"of evaluated terrain",
  vsMundo:"World: {b} %. This region: {r} % → {x}× the global rate.",nada:"No terrain passes the filter (wet, vegetated, ice or urban): the model does not evaluate it.",
  comp:"Variable comparison (median of evaluated terrain)",var:"Variable",reg:"Region",pend:"Slope (°)",alb:"Albedo",rug:"Roughness (m)",dentro:"Within the typical range (p10–p90)?",
@@ -186,10 +187,36 @@ function histSVG(key,vals){const b=REF.bins[KEYV[key]],nb=b.length-1;const cnt=n
   const etq=key==="alb"?b.filter((_,j)=>j%5===0).map(x=>fmt(x,2)):b.slice(0,-1).filter((_,j)=>j%3===0).map(x=>fmt(x,key==="pend"?(x<1?2:0):0));
   return '<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px"><b>'+t(key)+'</b><span style="color:var(--mut)"><i class="sw" style="background:#f0a35e"></i>'+t("reg")+' <i class="sw" style="background:#c1440e"></i>'+t("marte")+' <i class="sw" style="background:#e5e7eb"></i>'+t("luna")+'</span></div>'+s+'<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut)">'+etq.map(x=>'<span>'+x+'</span>').join("")+'</div></div>';}
 let ultimo="";
+// Vista satelital de la selección (teselas Esri, proyección Web Mercator)
+const ESRI_T="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/";
+function mx(lon,z){return (lon+180)/360*256*Math.pow(2,z);}
+function my(lat,z){const l=Math.max(-85,Math.min(85,lat))*Math.PI/180;return (1-Math.log(Math.tan(l)+1/Math.cos(l))/Math.PI)/2*256*Math.pow(2,z);}
+let SAT=null,SATDZ=0;
+function satZoom(d){if(!SAT)return;SATDZ=Math.max(-6,Math.min(6,SATDZ+d));const el=document.getElementById('satv');if(el)el.outerHTML=satHTML(...SAT);}
+function satHTML(latS,latN,lonW,lonE,esPunto,ancho){SAT=[latS,latN,lonW,lonE,esPunto,ancho];
+  const latM=(latN+latS)/2,km=Math.max((latN-latS)*111,(lonE-lonW)*111*Math.cos(latM*Math.PI/180));
+  if(km>2000)return '<div class="sat sat-msg" id="satv">'+t("satGrande")+'</div>';
+  const Wp=Math.max(240,Math.round(ancho)),Hp=220,pa=(latN-latS)*0.15,po=(lonE-lonW)*0.15;
+  let z=3;for(let k=16;k>=3;k--){if(mx(lonE+po,k)-mx(lonW-po,k)<=Wp&&my(latS-pa,k)-my(latN+pa,k)<=Hp){z=k;break;}}
+  const z0=z;z=Math.max(2,Math.min(18,z0+SATDZ));
+  const cx=(mx(lonW,z)+mx(lonE,z))/2,cy=(my(latN,z)+my(latS,z))/2,L0=cx-Wp/2,T0=cy-Hp/2,n=Math.pow(2,z);
+  let h='<div class="sat" id="satv" style="width:'+Wp+'px;max-width:100%" onwheel="event.preventDefault();satZoom(event.deltaY<0?1:-1)"><div class="satno">'+t("satNo")+'</div>';
+  h+='<div class="satz"><button title="+" onclick="satZoom(1)">＋</button><button title="−" onclick="satZoom(-1)">－</button></div>';
+  for(let ty=Math.floor(T0/256);ty<=Math.floor((T0+Hp)/256);ty++){if(ty<0||ty>=n)continue;
+    for(let tx=Math.floor(L0/256);tx<=Math.floor((L0+Wp)/256);tx++){const wx=((tx%n)+n)%n;
+      h+='<img alt="" loading="lazy" src="'+ESRI_T+z+'/'+ty+'/'+wx+'" style="left:'+Math.round(tx*256-L0)+'px;top:'+Math.round(ty*256-T0)+'px" onerror="this.remove()">';}}
+  const bx=mx(lonW,z)-L0,by=my(latN,z)-T0,bw=mx(lonE,z)-mx(lonW,z),bh=my(latS,z)-my(latN,z);
+  h+='<div class="satbox" style="left:'+bx.toFixed(1)+'px;top:'+by.toFixed(1)+'px;width:'+bw.toFixed(1)+'px;height:'+bh.toFixed(1)+'px"></div>';
+  if(esPunto)h+='<div class="satpt" style="left:'+(Wp/2)+'px;top:'+(Hp/2)+'px"></div>';
+  const cLat=((latN+latS)/2).toFixed(4),cLon=((lonE+lonW)/2).toFixed(4);
+  h+='<a class="satver" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/@?api=1&map_action=map&center='+cLat+','+cLon+'&zoom='+Math.min(18,z+1)+'&basemap=satellite">'+t("satVer")+'</a>';
+  return h+'<div class="satcap">'+t("satCap")+'</div></div>';}
 function render(){const P=document.getElementById("panel");if(!D.n_tierra)return;if(!sel){P.innerHTML='<div class="empty">'+t("vacio")+'</div>';return;}
   const R=sel,S=calcular(R);const[la1,lo0]=latLon(R.c0,R.r0),[la0,lo1]=latLon(R.c1,R.r1);const unico=R.c0===R.c1&&R.r0===R.r1;
   const titulo=(unico?t("punto"):t("region"))+": "+(unico?fmt(la1,1)+"°, "+fmt(lo0,1)+"°":fmt(la0-RES/2,1)+"° … "+fmt(la1+RES/2,1)+"° / "+fmt(lo0-RES/2,1)+"° … "+fmt(lo1+RES/2,1)+"°");
   let h='<h2>'+titulo+'</h2>';
+  {if(window.__selPrev!==sel){window.__selPrev=sel;SATDZ=0;}const anchoSat=(document.getElementById("panel").clientWidth||460)-36;
+   h+=unico?satHTML(la1-0.25,la1+0.25,lo0-0.25,lo0+0.25,true,anchoSat):satHTML(la0-RES/2,la1+RES/2,lo0-RES/2,lo1+RES/2,false,anchoSat);}
   if(!S.nT){P.innerHTML=h+'<div class="empty">'+(L==="es"?"Sin tierra en la selección.":"No land in the selection.")+'</div>';return;}
   const ev=S.nM+S.nL+S.nF;const pM=ev?100*S.nM/ev:0,pL=ev?100*S.nL/ev:0;
   h+='<div class="sub">'+fmt(S.nT,0)+' '+t("tierra")+' (0,1°) · ~'+fmt(S.area,0)+' '+t("area")+' · '+fmt(100*ev/S.nT,0)+' % '+t("eval")+'</div>';
