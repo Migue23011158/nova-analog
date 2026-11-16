@@ -8,7 +8,7 @@
  * Reglas: ningún número se inventa. Lo que no viene en sitios.json se muestra como SIN DATO.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Rectangle, Tooltip, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Rectangle, Tooltip, ScaleControl, useMapEvents } from 'react-leaflet';
 import Globe from 'globe.gl';
 import { cargarModelo, clasificar as clasificarGMM } from './nova_gmm.js';
 import './App.css';
@@ -72,9 +72,20 @@ const EN = {
   // Comparar
   'TIERRA': 'EARTH', 'TOCA EL MAPA PARA CONSULTAR CUALQUIER PUNTO': 'TAP THE MAP TO CHECK ANY POINT', 'IMAGEN ORBITAL': 'ORBITAL IMAGE',
   'Imagen orbital de {r}': 'Orbital image of {r}',
-  'SIMILITUD CON {r}': 'SIMILARITY TO {r}', 'Pesos del índice': 'Index weights',
+  'SIMILITUD CON {r}': 'SIMILARITY TO {r}',
+  // Notas de ayuda (ⓘ)
+  "Qué tanto se parece la superficie de este sitio a la de referencia, de 0 a 100. No es una probabilidad.": "How much the surface of this site resembles the reference site, from 0 to 100. It is not a probability.",
+  "Marte o Luna, según cuál referencia se parece más, si el puntaje llega a 60. Si ninguna llega: \"No coincide\".": "Mars or Moon, whichever reference is more similar, if the score reaches 60. If none does: \"No match\".",
+  "Cuántas variables tuvieron dato en este sitio. Si falta alguna, el puntaje es menos seguro.": "How many variables had data at this site. If one is missing, the score is less certain.",
+  "Un modelo que aprendió de miles de píxeles reales de Marte, la Luna y la Tierra, usando pendiente y albedo. Puede responder \"ninguno\".": "A model that learned from thousands of real Mars, Moon and Earth pixels, using slope and albedo. It can answer \"none\".",
+  "El sitio no se parece a nada de lo que el modelo vio en Marte ni en la Luna.": "The site does not resemble anything the model saw on Mars or the Moon.",
+  "Qué tan inclinado es el terreno. Arcadia es casi plana (0,25°); el borde de Shackleton, empinado (17°).": "How steep the terrain is. Arcadia is almost flat (0.25°); the Shackleton rim is steep (17°).",
+  "Cuánta luz refleja la superficie: 0 es negro y 1 es blanco.": "How much light the surface reflects: 0 is black and 1 is white.",
+  "Qué parte del año el suelo se congela y se descongela en el mismo día.": "What fraction of the year the ground freezes and thaws within the same day.",
+  "Qué tan rápido se calienta y se enfría el suelo. En la Tierra se mide distinto que en Marte y la Luna, por eso no se compara número a número.": "How fast the ground heats up and cools down. On Earth it is measured differently than on Mars and the Moon, so it is not compared number to number.",
+  'Más información': 'More information', 'Pesos del índice': 'Index weights',
   'Ajustan el puntaje 0–100. El modelo entrenado usa solo pendiente y albedo.': 'They tune the 0–100 score. The trained model uses only slope and albedo.',
-  'Área analizada: 3 × 3 km': 'Analyzed area: 3 × 3 km', 'Celda del modelo (~{n} km)': 'Model cell (~{n} km)', 'Clase del sitio: {c}': 'Site class: {c}',
+  'Área analizada: 3 × 3 km': 'Analyzed area: 3 × 3 km', 'Área analizada': 'Analyzed area', 'Celda del modelo (~{n} km)': 'Model cell (~{n} km)', 'Clase del sitio: {c}': 'Site class: {c}',
   'mejor coincidencia: {r} {n}': 'best match: {r} {n}', 'clase si ≥ {n}': 'class if ≥ {n}',
   '{n} variables · confianza {c}': '{n} variables · confidence {c}', 'Variables con dato que entran al índice': 'Variables with data that enter the index',
   'Variables con dato que entran al índice, y confianza según los datos disponibles': 'Variables with data that enter the index, and confidence given the available data',
@@ -304,6 +315,31 @@ function ClassPill({ kind, long = false }) {
     <span className={`class-pill ${kind}`}>
       <i />
       {long && kind === 'pending' ? t('Pendiente de procesar') : PILL_TXT[kind]}
+    </span>
+  );
+}
+
+
+/* ---------- Notas de ayuda: ⓘ junto a un término; se ven al pasar el mouse o al tocar ---------- */
+const NOTA_TXT = {
+  similitud: "Qué tanto se parece la superficie de este sitio a la de referencia, de 0 a 100. No es una probabilidad.",
+  clase: "Marte o Luna, según cuál referencia se parece más, si el puntaje llega a 60. Si ninguna llega: \"No coincide\".",
+  confianza: "Cuántas variables tuvieron dato en este sitio. Si falta alguna, el puntaje es menos seguro.",
+  modelo: "Un modelo que aprendió de miles de píxeles reales de Marte, la Luna y la Tierra, usando pendiente y albedo. Puede responder \"ninguno\".",
+  fuera: "El sitio no se parece a nada de lo que el modelo vio en Marte ni en la Luna.",
+  pendiente_deg: "Qué tan inclinado es el terreno. Arcadia es casi plana (0,25°); el borde de Shackleton, empinado (17°).",
+  albedo: "Cuánta luz refleja la superficie: 0 es negro y 1 es blanco.",
+  ciclos_hielo_frac: "Qué parte del año el suelo se congela y se descongela en el mismo día.",
+  ati: "Qué tan rápido se calienta y se enfría el suelo. En la Tierra se mide distinto que en Marte y la Luna, por eso no se compara número a número.",
+};
+function Nota({ k, children }) {
+  const txt = NOTA_TXT[k];
+  if (!txt) return children ?? null;
+  return (
+    <span className="nota" tabIndex={0} aria-label={t('Más información')} onClick={(e) => e.stopPropagation()}>
+      <span className="nota-term">{children}</span>
+      <span className="nota-i" aria-hidden="true">i</span>
+      <span className="nota-pop" role="tooltip">{t(txt)}</span>
     </span>
   );
 }
@@ -815,7 +851,7 @@ function Weights({ variables, pesos, setPesos, propositos, proposito, cambiarPro
         const val = Math.round((pesos[v] ?? 0) * 100);
         return (
           <label className="slider" key={v}>
-            <span><b>{VARS[v]?.label || v}</b><em>{val}%</em></span>
+            <span><b><Nota k={v}>{VARS[v]?.label || v}</Nota></b><em>{val}%</em></span>
             <input type="range" min="0" max="100" value={val}
               onChange={(e) => setPesos({ ...pesos, [v]: Number(e.target.value) / 100 })}
               style={{ '--value': `${val}%` }} />
@@ -921,14 +957,17 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
               zoomControl={false} attributionControl={false} style={{ height: '100%', width: '100%' }}>
               <TileLayer url={ESRI} maxNativeZoom={16} maxZoom={18} />
               <ClickPunto onPick={elegirPunto} />
-              {/* Área analizada del sitio (3 × 3 km) */}
+              <ScaleControl position="bottomright" imperial={false} />
+              {/* Área analizada del sitio (3 × 3 km) con su centro */}
               <Rectangle bounds={areaSitio(sel.lat, sel.lon)}
-                pathOptions={{ color: target === 'moon' ? '#8dbeee' : '#e8743b', weight: 2, fill: true, fillOpacity: 0.08, dashArray: '6 4' }}>
+                pathOptions={{ color: target === 'moon' ? '#8dbeee' : '#e8743b', weight: 2, fill: false, dashArray: '6 4' }}>
                 <Tooltip direction="top" sticky>{t('Área analizada: 3 × 3 km')}</Tooltip>
               </Rectangle>
+              <CircleMarker center={[sel.lat, sel.lon]} radius={3} interactive={false}
+                pathOptions={{ color: target === 'moon' ? '#8dbeee' : '#e8743b', weight: 2, fillColor: '#ffffff', fillOpacity: 1 }} />
               {punto?.celda && (
                 <Rectangle bounds={punto.celda}
-                  pathOptions={{ color: '#ffffff', weight: 1.5, fill: true, fillOpacity: 0.06, dashArray: '3 4' }}>
+                  pathOptions={{ color: '#ffffff', weight: 1.5, fill: false, dashArray: '3 4' }}>
                   <Tooltip direction="top" sticky>{t('Celda del modelo (~{n} km)', { n: punto.km })}</Tooltip>
                 </Rectangle>
               )}
@@ -938,6 +977,11 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
               )}
             </MapContainer>
             {punto && <PuntoCard punto={punto} onClose={() => setPunto(null)} />}
+            {!punto && (
+              <div className={`area-chip ${target}`}>
+                <i /> {t('Área analizada')} · 3 × 3 km · {fmtCoord(sel.lat, sel.lon)}
+              </div>
+            )}
             <span className="corner tl" /><span className="corner tr" />
             <span className="corner bl" /><span className="corner br" />
             <span className="credit">Esri World Imagery</span>
@@ -970,7 +1014,7 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
         </section>
 
         <div className={`score-wrap ${target} ${score === null ? 'no-score' : ''}`}>
-          <p className="score-title">{t('SIMILITUD CON {r}', { r: ref.corto.toUpperCase() })}</p>
+          <p className="score-title"><Nota k="similitud">{t('SIMILITUD CON {r}', { r: ref.corto.toUpperCase() })}</Nota></p>
           <div className="score-ring" style={{ '--score': `${(score ?? 0) * 3.6}deg` }}>
             <div><strong>{score === null ? '—' : fmtIdx(score)}</strong><span>/ 100</span></div>
           </div>
@@ -979,7 +1023,7 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
 
       <div className="score-notes">
         <span className={`score-note clase-note c-${sel.kind}`}>
-          {t('Clase del sitio: {c}', { c: CLASE_TXT[sel.kind] })}
+          <Nota k="clase">{t('Clase del sitio: {c}', { c: CLASE_TXT[sel.kind] })}</Nota>
           {mejor && mejor.rk !== refKey && ` (${t('mejor coincidencia: {r} {n}', { r: REFS[mejor.rk]?.corto, n: fmtIdx(mejor.x) })})`}
         </span>
         <span className="score-note">
@@ -989,7 +1033,7 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
         </span>
           {evaluable && (
           <span className="score-note" title={t('Variables con dato que entran al índice')}>
-            {t('{n} variables · confianza {c}', { n: filas.filter((f) => !f.noAplica && f.sim !== null).length, c: nivelConf ? t(nivelConf.toLowerCase()) : t('sin dato') })}
+            <Nota k="confianza">{t('{n} variables · confianza {c}', { n: filas.filter((f) => !f.noAplica && f.sim !== null).length, c: nivelConf ? t(nivelConf.toLowerCase()) : t('sin dato') })}</Nota>
           </span>
         )}
         <span className="score-note">{t('Índice de similitud 0–100 · no es una probabilidad')}</span>
@@ -1042,7 +1086,7 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
                   <strong className={f.faltaT ? 'missing' : ''}>{f.tierra}</strong>
                 </div>
                 <div className="metric-center">
-                  <div className="metric-head"><span>{f.label}</span><b>{falta ? '—' : `${pct}%`}</b></div>
+                  <div className="metric-head"><span><Nota k={f.v}>{f.label}</Nota></span><b>{falta ? '—' : `${pct}%`}</b></div>
                   {falta ? (
                     <div className="missing-track" title={
                       t(f.noAplica ? 'Esta variable no existe en la Luna: no se compara.'
@@ -1222,8 +1266,10 @@ function ModeloSection({ sel, sitios }) {
   return (
     <section className="model-section">
       <div className="glass-card model-card">
-        <small>{t('MODELO ENTRENADO · GMM')}</small>
-        <div className="model-class" style={{ color, borderColor: color }}>{sinDato ? t('SIN DATO') : tClase(clase)}</div>
+        <small><Nota k="modelo">{t('MODELO ENTRENADO · GMM')}</Nota></small>
+        <div className="model-class" style={{ color, borderColor: color }}>
+          {sinDato ? t('SIN DATO') : clase.startsWith('Ninguna (fuera de rango)') ? <Nota k="fuera">{tClase(clase)}</Nota> : tClase(clase)}
+        </div>
         {clase.startsWith('Ninguna (fuera de rango)') && (
           <p className="model-note">{t('Sus condiciones están fuera de lo que el modelo conoce de Marte y de la Luna.')}</p>
         )}

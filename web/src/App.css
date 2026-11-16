@@ -1968,3 +1968,50 @@ small, .image-meta, .eyebrow, .site-caption p, .metric-value small, .metric-head
 .weights-note { margin: 4px 0 10px; color: #a9b8c9; font-size: 12.5px; line-height: 1.4; }
 .site-image .leaflet-tooltip { font: 12px 'Space Grotesk', sans-serif; }
 @media (min-width: 801px) { .explore-heading p { white-space: nowrap; flex-wrap: nowrap; } .explore-heading p .hint-inline { margin-left: 14px; font-size: 10.5px; } }
+
+/* ===================== v8.1: notas de ayuda (ⓘ) ===================== */
+.nota { position: relative; display: inline-flex; align-items: center; gap: 5px; cursor: help; outline: none; }
+.nota-term { text-decoration: underline dotted rgba(185, 199, 214, 0.55); text-underline-offset: 3px; }
+.nota-i {
+  display: inline-grid; place-items: center; flex: none; width: 15px; height: 15px; border-radius: 50%;
+  border: 1px solid rgba(185, 199, 214, 0.7); color: #dbe7f7; font: italic 700 10px/1 Georgia, serif;
+  text-transform: none; letter-spacing: 0;
+}
+.nota-pop {
+  position: absolute; z-index: 2000; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+  width: max-content; max-width: 270px; padding: 9px 12px; border-radius: 10px;
+  background: #0d1522; border: 1px solid rgba(141, 174, 208, 0.45); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  color: #e6eef8; font: 400 13px/1.45 'Space Grotesk', sans-serif; letter-spacing: 0; text-transform: none; text-align: left;
+  white-space: normal; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.15s, transform 0.15s;
+}
+.nota-pop::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: rgba(141, 174, 208, 0.45);
+}
+.nota:hover .nota-pop, .nota:focus .nota-pop, .nota:focus-within .nota-pop {
+  opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+}
+.nota:hover .nota-i, .nota:focus .nota-i { background: rgba(141, 174, 208, 0.25); }
+/* En las variables y los deslizadores (columna izquierda) la nota se abre hacia la derecha para no salirse */
+.metric-head .nota-pop, .slider .nota-pop { left: 0; transform: translateY(4px); }
+.metric-head .nota:hover .nota-pop, .metric-head .nota:focus .nota-pop,
+.slider .nota:hover .nota-pop, .slider .nota:focus .nota-pop { transform: translateY(0); }
+.metric-head .nota-pop::after, .slider .nota-pop::after { left: 18px; }
+.metrics-section { overflow: visible; }
+@media (max-width: 800px) { .nota-pop { max-width: 230px; font-size: 12.5px; } }
+
+/* ===================== v8.2: zona analizada más visible ===================== */
+.area-chip {
+  position: absolute; z-index: 900; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 10px; border-radius: 8px; background: rgba(6, 9, 15, 0.82); border: 1px solid rgba(var(--glow, 232, 116, 59), 0.6);
+  color: #e6eef8; font: 12px 'IBM Plex Mono', monospace; letter-spacing: 0.02em; pointer-events: none;
+}
+.area-chip i { width: 12px; height: 9px; border: 1.5px dashed rgb(var(--glow, 232, 116, 59)); border-radius: 2px; }
+.site-image .leaflet-control-scale { margin: 0 12px 10px 0; }
+.site-image .leaflet-control-scale-line {
+  background: rgba(6, 9, 15, 0.8) !important; border-color: #cfe2ff !important; color: #e6eef8 !important; font: 11px "IBM Plex Mono", monospace;
+}
+@media (max-width: 800px) { .area-chip { font-size: 10.5px; top: 8px; left: 8px; } }
+/* v8.3: la foto de la Tierra sin ningún tinte (solo contorno del área) */
+.earth .site-image img, .earth .site-image .leaflet-tile { filter: none !important; }
+.compare-visual .site-image { background: #0b111c; }
