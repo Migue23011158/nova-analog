@@ -1956,7 +1956,6 @@ small, .image-meta, .eyebrow, .site-caption p, .metric-value small, .metric-head
 @media (min-width: 801px) {
   .globe-hint { top: 104px; }
   /* En español el título ocupa dos líneas y no queda espacio: se oculta la ayuda (arrastrar sigue funcionando) */
-  html[lang="es"] .globe-hint { display: none; }
 }
 /* v7.9 */
 
@@ -2015,3 +2014,30 @@ small, .image-meta, .eyebrow, .site-caption p, .metric-value small, .metric-head
 /* v8.3: la foto de la Tierra sin ningún tinte (solo contorno del área) */
 .earth .site-image img, .earth .site-image .leaflet-tile { filter: none !important; }
 .compare-visual .site-image { background: #0b111c; }
+/* v8.4: botón del comparador encima de la lista de sitios */
+.comparador-link.side { width: 100%; margin: 0; text-align: center; padding: 10px 16px; background: rgba(59, 163, 255, 0.08); }
+@media (min-width: 801px) { .explore-sidebar { grid-template-rows: auto minmax(0, 1fr) auto; } }
+.parecidos .site-list-copy { grid-template-columns: 1fr; }
+.parecidos .parecidos-tags { grid-column: 1; grid-row: 3; }
+@media (min-width: 801px) {
+  /* la lista de sitios conserva su altura con el botón encima */
+  .explore-sidebar { grid-template-rows: auto minmax(260px, 1fr) auto; }
+  .explore-view { min-height: 760px; }
+}
+
+/* ===================== v8.5 ===================== */
+.explore-heading .eyebrow-row { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+.explore-heading .eyebrow-row p { margin: 0; }
+@media (min-width: 801px) {
+  .explore-heading .eyebrow-row { max-width: 760px; }
+  .globe-hint { display: block !important; top: 112px; left: 50%; right: auto; transform: translateX(-50%); }
+  .body-switch { top: 134px; }
+}
+.terreno-link {
+  position: absolute; z-index: 950; top: 12px; right: 12px; padding: 5px 10px; border-radius: 8px;
+  background: rgba(6, 9, 15, 0.82); border: 1px solid rgba(207, 226, 255, 0.45); color: #e6eef8;
+  font: 12px 'Space Grotesk', sans-serif; text-decoration: none;
+}
+.terreno-link:hover { background: rgba(59, 163, 255, 0.2); }
+@media (max-width: 800px) { .terreno-link { top: 8px; right: 8px; font-size: 11px; } .area-chip { max-width: 62%; white-space: normal; } }
+.explore-heading .eyebrow-row > span { font: 13px "IBM Plex Mono", monospace; letter-spacing: 0.18em; color: #c2cad6; text-transform: uppercase; }

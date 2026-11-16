@@ -27,6 +27,7 @@ const EN = {
   'Marte · Arcadia Planitia': 'Mars · Arcadia Planitia', 'Luna · Borde de Shackleton': 'Moon · Shackleton rim',
   'ANÁLOGOS TERRESTRES / {n} SITIOS': 'EARTH ANALOGS / {n} SITES',
   'Encuentra un pedazo de Marte o de la Luna en la Tierra.': 'Find a piece of Mars or the Moon on Earth.',
+  '¿Tu vecindario tiene un gemelo en la Luna o en Marte?': 'Does your neighborhood have a twin on the Moon or Mars?',
   'Elige Marte o Luna': 'Pick Mars or Moon', 'Elige un sitio': 'Pick a site', 'Compara': 'Compare',
   'ARRASTRA PARA GIRAR · RUEDA PARA ACERCAR': 'DRAG TO ROTATE · SCROLL TO ZOOM',
   'No se pudo cargar sitios.json': 'Could not load sitios.json',
@@ -85,7 +86,7 @@ const EN = {
   "Qué tan rápido se calienta y se enfría el suelo. En la Tierra se mide distinto que en Marte y la Luna, por eso no se compara número a número.": "How fast the ground heats up and cools down. On Earth it is measured differently than on Mars and the Moon, so it is not compared number to number.",
   'Más información': 'More information', 'Pesos del índice': 'Index weights',
   'Ajustan el puntaje 0–100. El modelo entrenado usa solo pendiente y albedo.': 'They tune the 0–100 score. The trained model uses only slope and albedo.',
-  'Área analizada: 3 × 3 km': 'Analyzed area: 3 × 3 km', 'Área analizada': 'Analyzed area', 'Celda del modelo (~{n} km)': 'Model cell (~{n} km)', 'Clase del sitio: {c}': 'Site class: {c}',
+  'Área analizada: 3 × 3 km': 'Analyzed area: 3 × 3 km', 'Área analizada': 'Analyzed area', 'Ver terreno': 'View terrain', 'Celda del modelo (~{n} km)': 'Model cell (~{n} km)', 'Clase del sitio: {c}': 'Site class: {c}',
   'mejor coincidencia: {r} {n}': 'best match: {r} {n}', 'clase si ≥ {n}': 'class if ≥ {n}',
   '{n} variables · confianza {c}': '{n} variables · confidence {c}', 'Variables con dato que entran al índice': 'Variables with data that enter the index',
   'Variables con dato que entran al índice, y confianza según los datos disponibles': 'Variables with data that enter the index, and confidence given the available data',
@@ -526,10 +527,11 @@ export default function App() {
         <main className="explore-view">
           <section className="globe-section">
             <div className="explore-heading">
-              <span>{t('ANÁLOGOS TERRESTRES / {n} SITIOS', { n: sitios.length })}</span>
-              <h1>{t('Encuentra un pedazo de Marte o de la Luna en la Tierra.')}</h1>
-              <p><b>1</b> {t('Elige Marte o Luna')} <i /> <b>2</b> {t('Elige un sitio')} <i /> <b>3</b> {t('Compara')}
-                {cuerpo === 'tierra' && LANG === 'es' && <span className="hint-inline">ARRASTRA PARA GIRAR · RUEDA PARA ACERCAR</span>}</p>
+              <div className="eyebrow-row">
+                <span>{t('ANÁLOGOS TERRESTRES / {n} SITIOS', { n: sitios.length })}</span>
+                <p><b>1</b> {t('Elige Marte o Luna')} <i /> <b>2</b> {t('Elige un sitio')} <i /> <b>3</b> {t('Compara')}</p>
+              </div>
+              <h1>{t('¿Tu vecindario tiene un gemelo en la Luna o en Marte?')}</h1>
             </div>
             <div className="segmented body-switch" role="tablist" aria-label="Cuerpo del globo">
               {Object.entries(CUERPOS).map(([k, c]) => (
@@ -543,6 +545,9 @@ export default function App() {
               onSelect={(z) => setZonaSel(z)} onCompare={() => abrirComparar()} />
           </section>
           <aside className="explore-sidebar">
+            <a className="comparador-link side" href={BASE + 'comparador/comparador.html'} target="_blank" rel="noopener noreferrer">
+              {LANG === 'en' ? 'Compare any region →' : 'Comparar cualquier región →'}
+            </a>
             {cuerpo === 'tierra' ? (
               <>
                 <SitesList sitios={sitios} sel={sel} miPos={miPos} pedirUbicacion={pedirUbicacion}
@@ -977,6 +982,10 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
               )}
             </MapContainer>
             {punto && <PuntoCard punto={punto} onClose={() => setPunto(null)} />}
+            <a className="terreno-link" target="_blank" rel="noopener noreferrer"
+              href={`https://www.google.com/maps/@?api=1&map_action=map&center=${(punto || sel).lat},${(punto || sel).lon}&zoom=13&basemap=satellite`}>
+              {t('Ver terreno')} ↗
+            </a>
             {!punto && (
               <div className={`area-chip ${target}`}>
                 <i /> {t('Área analizada')} · 3 × 3 km · {fmtCoord(sel.lat, sel.lon)}
@@ -1053,10 +1062,6 @@ function CompareView({ datos, sitios, sel, target, refKey, refs, variables, prop
           </button>
         ))}
       </section>
-
-      <a className="comparador-link" href={BASE + 'comparador/comparador.html'} target="_blank" rel="noopener noreferrer">
-        {LANG === 'en' ? 'Compare any region →' : 'Comparar cualquier región →'}
-      </a>
 
       <section className="conclusion">
         <span>{t('CONCLUSIÓN')}</span>
