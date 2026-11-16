@@ -540,6 +540,11 @@ export default function App() {
               <h1>{t('¿Tu vecindario tiene un gemelo en la Luna o en Marte?')}</h1>
             </div>
             <SelectorRef target={target} setTarget={(x) => { setTarget(x); }} className="ref-switch-explore" />
+            <a className="explora-btn explora-hero" href={BASE + 'comparador/comparador.html'} target="_blank" rel="noopener noreferrer">
+              <span>{LANG === 'en' ? 'Explore anywhere on Earth' : 'Explora cualquier lugar del mundo'}</span>
+              <small>{LANG === 'en' ? 'Select a region and compare it with Mars and the Moon' : 'Selecciona una región y compárala con Marte y la Luna'}</small>
+              <b aria-hidden="true">→</b>
+            </a>
             <div className="globe-controls">
               {cuerpo === 'tierra' && <span className="globe-hint">{t('ARRASTRA PARA GIRAR · RUEDA PARA ACERCAR')}</span>}
               <div className="segmented body-switch" role="tablist" aria-label="Cuerpo del globo">
@@ -554,8 +559,10 @@ export default function App() {
               onSelect={(z) => setZonaSel(z)} onCompare={() => abrirComparar()} />
           </section>
           <aside className="explore-sidebar">
-            <a className="comparador-link side" href={BASE + 'comparador/comparador.html'} target="_blank" rel="noopener noreferrer">
-              {LANG === 'en' ? 'What about your region? Check it →' : '¿Y tu región? Compruébalo →'}
+            <a className="explora-btn explora-side" href={BASE + 'comparador/comparador.html'} target="_blank" rel="noopener noreferrer">
+              <span>{LANG === 'en' ? 'Explore anywhere on Earth' : 'Explora cualquier lugar del mundo'}</span>
+              <small>{LANG === 'en' ? 'Select a region and compare it with Mars and the Moon' : 'Selecciona una región y compárala con Marte y la Luna'}</small>
+              <b aria-hidden="true">→</b>
             </a>
             {cuerpo === 'tierra' ? (
               <>

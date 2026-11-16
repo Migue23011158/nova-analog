@@ -2064,3 +2064,79 @@ small, .image-meta, .eyebrow, .site-caption p, .metric-value small, .metric-head
   .globe-section { height: 600px; }
   .globe-area { inset: 196px 0 0; }
 }
+
+/* ===================== v8.7: botón "Explora cualquier lugar del mundo" a la izquierda del globo ===================== */
+@media (min-width: 801px) { .explore-sidebar { grid-template-rows: minmax(260px, 1fr) auto; } }
+.explora-btn {
+  position: absolute; z-index: 30; left: 0; top: 200px; width: 230px;
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center;
+  padding: 14px 16px; border-radius: 16px; text-decoration: none; color: #fff;
+  background: linear-gradient(120deg, #C1440E, #8DAED0);
+  box-shadow: 0 10px 28px rgba(193, 68, 14, 0.28); transition: transform 0.15s, filter 0.15s;
+}
+.explora-btn span { font: 600 16px/1.25 'Space Grotesk', sans-serif; }
+.explora-btn small { grid-column: 1; font: 12px/1.35 'Space Grotesk', sans-serif; color: rgba(255, 255, 255, 0.88); }
+.explora-btn b { grid-column: 2; grid-row: 1 / 3; font-size: 22px; font-weight: 400; }
+.explora-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+@media (max-width: 800px) {
+  .explora-btn { position: relative; top: auto; left: auto; width: auto; margin: 0 12px 10px; }
+}
+.explora-btn.solo-movil { display: none; }
+@media (max-width: 800px) {
+  .globe-section .explora-btn { display: none; }
+  .explora-btn.solo-movil { display: grid; position: relative; margin: 0 0 12px; }
+}
+/* v8.7b (v8.8): celular igual que PC — Marte/Luna arriba del globo, Tierra/Marte/Luna debajo */
+@media (max-width: 800px) {
+  .globe-section { height: 640px; }
+  .ref-switch-explore { top: 96px; }
+  .globe-area { inset: 140px 0 120px; }
+  .globe-controls { top: auto !important; bottom: 66px; }
+  .globe-area .marker-card { bottom: 6px; }
+}
+@media (max-width: 800px) {
+  .globe-section { height: 610px; }
+  .globe-area { inset: 140px 0 64px; }
+  .globe-area .legend { display: none; }
+  .globe-controls { bottom: 10px; }
+  .globe-area .marker-card { bottom: 4px; }
+}
+
+/* ===================== v8.9 (v9.0): botón "Explora" — PC arriba de los sitios, celular bajo el título ===================== */
+.explora-btn.explora-side, .explora-btn.explora-hero {
+  position: relative; top: auto; left: auto; width: auto; margin: 0;
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px;
+  padding: 11px 18px; border-radius: 999px; text-decoration: none; color: #fff;
+  background: linear-gradient(90deg, #C1440E, #8DAED0);
+  box-shadow: 0 8px 22px rgba(193, 68, 14, 0.25); transition: transform 0.15s, filter 0.15s;
+}
+.explora-btn.explora-side small, .explora-btn.explora-hero small { display: none; }
+.explora-btn.explora-side span, .explora-btn.explora-hero span { font: 600 15px/1.2 'Space Grotesk', sans-serif; }
+.explora-btn.explora-side b, .explora-btn.explora-hero b { grid-row: 1; grid-column: 2; font-size: 18px; font-weight: 400; }
+.explora-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+
+@media (min-width: 801px) {
+  .explora-btn.explora-hero { display: none !important; }
+  .explora-btn.explora-side { display: grid !important; }
+  .explore-sidebar { grid-template-rows: auto minmax(260px, 1fr) auto !important; }
+}
+@media (max-width: 800px) {
+  .explora-btn.explora-side { display: none !important; }
+  .explora-btn.explora-hero {
+    display: grid !important; position: absolute; z-index: 30; left: 12px; right: 12px; top: 150px;
+  }
+  .globe-section { height: 700px !important; }
+  .ref-switch-explore { top: 204px !important; }
+  .globe-area { inset: 250px 0 70px !important; }
+  .globe-controls { top: auto !important; bottom: 16px !important; }
+  .globe-area .marker-card { bottom: 4px !important; }
+  .globe-area .legend { display: none; }
+}
+@media (max-width: 800px) {
+  .explora-btn.explora-hero { top: 116px; }
+  .ref-switch-explore { top: 168px !important; }
+  .globe-section { height: 600px !important; }
+  .globe-area { inset: 210px 0 62px !important; }
+  .globe-controls { bottom: 12px !important; }
+  .globe-area .marker-card { width: 160px; padding: 8px 10px; }
+}
