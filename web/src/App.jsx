@@ -345,6 +345,19 @@ function Nota({ k, children }) {
   );
 }
 
+function SelectorRef({ target, setTarget, className = '' }) {
+  return (
+    <div className={`segmented target-switch ${className}`}>
+      <button className={`mars-tab ${target === 'mars' ? 'active' : ''}`} onClick={() => setTarget('mars')}>
+        <span /> {t('Marte · Arcadia Planitia')}
+      </button>
+      <button className={`moon-tab ${target === 'moon' ? 'active' : ''}`} onClick={() => setTarget('moon')}>
+        <span /> {t('Luna · Borde de Shackleton')}
+      </button>
+    </div>
+  );
+}
+
 const GlassCard = ({ children, className = '' }) => <div className={`glass-card ${className}`}>{children}</div>;
 
 /* =====================================================================================
@@ -494,14 +507,7 @@ export default function App() {
 
       <header className="topbar">
         <Logo />
-        <div className="segmented target-switch">
-          <button className={`mars-tab ${target === 'mars' ? 'active' : ''}`} onClick={() => setTarget('mars')}>
-            <span /> {t('Marte · Arcadia Planitia')}
-          </button>
-          <button className={`moon-tab ${target === 'moon' ? 'active' : ''}`} onClick={() => setTarget('moon')}>
-            <span /> {t('Luna · Borde de Shackleton')}
-          </button>
-        </div>
+        {view === 'compare' ? <SelectorRef target={target} setTarget={setTarget} /> : <span />}
         <div className="top-actions">
         <button className="lang-btn" onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
           aria-label={lang === 'es' ? 'Switch to English' : 'Cambiar a español'}>
@@ -533,20 +539,23 @@ export default function App() {
               </div>
               <h1>{t('¿Tu vecindario tiene un gemelo en la Luna o en Marte?')}</h1>
             </div>
-            <div className="segmented body-switch" role="tablist" aria-label="Cuerpo del globo">
-              {Object.entries(CUERPOS).map(([k, c]) => (
-                <button key={k} className={`${cuerpo === k ? 'active' : ''} b-${k}`} onClick={() => elegirCuerpo(k)}>
-                  <span /> {c.nombre}
-                </button>
-              ))}
+            <SelectorRef target={target} setTarget={(x) => { setTarget(x); }} className="ref-switch-explore" />
+            <div className="globe-controls">
+              {cuerpo === 'tierra' && <span className="globe-hint">{t('ARRASTRA PARA GIRAR · RUEDA PARA ACERCAR')}</span>}
+              <div className="segmented body-switch" role="tablist" aria-label="Cuerpo del globo">
+                {Object.entries(CUERPOS).map(([k, c]) => (
+                  <button key={k} className={`${cuerpo === k ? 'active' : ''} b-${k}`} onClick={() => elegirCuerpo(k)}>
+                    <span /> {c.nombre}
+                  </button>
+                ))}
+              </div>
             </div>
-            {cuerpo === 'tierra' && <span className="globe-hint">{t('ARRASTRA PARA GIRAR · RUEDA PARA ACERCAR')}</span>}
             <EarthGlobe sitios={sitios} sel={sel} miPos={miPos} cuerpo={cuerpo} lang={lang}
               onSelect={(z) => setZonaSel(z)} onCompare={() => abrirComparar()} />
           </section>
           <aside className="explore-sidebar">
             <a className="comparador-link side" href={BASE + 'comparador/comparador.html'} target="_blank" rel="noopener noreferrer">
-              {LANG === 'en' ? 'Compare any region →' : 'Comparar cualquier región →'}
+              {LANG === 'en' ? 'What about your region? Check it →' : '¿Y tu región? Compruébalo →'}
             </a>
             {cuerpo === 'tierra' ? (
               <>

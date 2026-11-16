@@ -2041,3 +2041,26 @@ small, .image-meta, .eyebrow, .site-caption p, .metric-value small, .metric-head
 .terreno-link:hover { background: rgba(59, 163, 255, 0.2); }
 @media (max-width: 800px) { .terreno-link { top: 8px; right: 8px; font-size: 11px; } .area-chip { max-width: 62%; white-space: normal; } }
 .explore-heading .eyebrow-row > span { font: 13px "IBM Plex Mono", monospace; letter-spacing: 0.18em; color: #c2cad6; text-transform: uppercase; }
+
+/* ===================== v8.6: selector de referencia arriba, Tierra/Marte/Luna debajo del globo ===================== */
+.ref-switch-explore { position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); top: 128px; justify-self: auto; }
+.globe-controls {
+  position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); bottom: 64px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.globe-controls .body-switch, .globe-controls .globe-hint {
+  position: static !important; transform: none !important; top: auto !important; left: auto !important;
+}
+.globe-controls .globe-hint { display: block !important; white-space: nowrap; }
+@media (max-width: 800px) {
+  .ref-switch-explore { top: 112px; width: calc(100% - 24px); }
+  .globe-controls { bottom: 52px; }
+}
+@media (max-width: 800px) {
+  .explore-heading .eyebrow-row p { display: none; }
+  .ref-switch-explore { top: 96px; }
+  .globe-controls { top: 146px; bottom: auto; }
+  .globe-controls .globe-hint { display: none !important; }
+  .globe-section { height: 600px; }
+  .globe-area { inset: 196px 0 0; }
+}
